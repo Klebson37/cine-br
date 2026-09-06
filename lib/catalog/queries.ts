@@ -1,5 +1,6 @@
 import { TmdbError, WATCH_REGION, tmdbFetch } from '@/lib/tmdb/client'
 import type {
+  RawExternalIds,
   RawGenre,
   RawMovie,
   RawMovieDetail,
@@ -39,6 +40,10 @@ export interface DiscoverOptions {
   genreId?: number
   sortBy?: string
   page?: number
+  /** Pré-filtro barato: corta a maioria dos reprovados antes da consulta
+   *  cara ao IMDb. Quem calcula o valor é rating-filter.ts. */
+  minVoteAverage?: number
+  minVoteCount?: number
 }
 
 export async function discoverMovies({
@@ -46,6 +51,8 @@ export async function discoverMovies({
   genreId,
   sortBy = DEFAULT_SORT,
   page = 1,
+  minVoteAverage,
+  minVoteCount,
 }: DiscoverOptions): Promise<Movie[]> {
   const data = await tmdbFetch<RawPaginated<RawMovie>>(
     '/discover/movie',
@@ -59,6 +66,8 @@ export async function discoverMovies({
       with_genres: genreId,
       sort_by: sortBy,
       page,
+      'vote_average.gte': minVoteAverage,
+      'vote_count.gte': minVoteCount,
     },
     CACHE.catalog,
   )
@@ -98,6 +107,17 @@ export async function getAvailability(id: number): Promise<Availability> {
     CACHE.availability,
   )
   return toAvailability(data)
+}
+
+/** O tconst do filme no IMDb. Uma requisição por filme, cacheada 24h — é o
+ *  único custo que sobra depois do pré-filtro e da deduplicação. */
+export async function getImdbId(id: number): Promise<string | null> {
+  const data = await tmdbFetch<RawExternalIds>(
+    `/movie/${id}/external_ids`,
+    {},
+    CACHE.detail,
+  )
+  return data.imdb_id ?? null
 }
 
 export async function getMovieDetail(id: number): Promise<MovieDetail | null> {

@@ -34,6 +34,12 @@ export interface RawWatchProviders {
   >
 }
 
+/** O /discover não devolve imdb_id. Sem esta chamada extra não há como ligar
+ *  um filme do TMDB à sua nota no IMDb. */
+export interface RawExternalIds {
+  imdb_id?: string | null
+}
+
 export interface RawCastMember {
   id: number
   name: string

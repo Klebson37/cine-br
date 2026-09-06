@@ -11,6 +11,7 @@ import { TmdbError } from '@/lib/tmdb/client'
 import {
   discoverMovies,
   getAvailability,
+  getImdbId,
   getMovieDetail,
   getRegionProviders,
   searchMovies,
@@ -233,5 +234,57 @@ describe('entradas sem pôster', () => {
     const movies = await searchMovies('qualquer coisa')
 
     expect(movies.map((m) => m.id)).toEqual([550])
+  })
+})
+
+describe('discoverMovies com pré-filtro de nota', () => {
+  beforeEach(() => tmdbFetch.mockResolvedValue(paginated([RAW])))
+  afterEach(() => vi.clearAllMocks())
+
+  it('não envia o pré-filtro quando não há filtro de nota', async () => {
+    await discoverMovies({})
+    const [, params] = tmdbFetch.mock.calls[0]
+    expect(params['vote_average.gte']).toBeUndefined()
+    expect(params['vote_count.gte']).toBeUndefined()
+  })
+
+  it('repassa o piso de nota e o piso de votos', async () => {
+    await discoverMovies({ minVoteAverage: 7.5, minVoteCount: 200 })
+    const [, params] = tmdbFetch.mock.calls[0]
+    expect(params['vote_average.gte']).toBe(7.5)
+    expect(params['vote_count.gte']).toBe(200)
+  })
+})
+
+describe('getImdbId', () => {
+  afterEach(() => vi.clearAllMocks())
+
+  it('busca os ids externos do filme', async () => {
+    tmdbFetch.mockResolvedValue({ imdb_id: 'tt0137523' })
+    await getImdbId(550)
+    const [path] = tmdbFetch.mock.calls[0]
+    expect(path).toBe('/movie/550/external_ids')
+  })
+
+  it('devolve o tconst', async () => {
+    tmdbFetch.mockResolvedValue({ imdb_id: 'tt0137523' })
+    expect(await getImdbId(550)).toBe('tt0137523')
+  })
+
+  it('devolve null quando o TMDB não conhece o imdb_id', async () => {
+    tmdbFetch.mockResolvedValue({ imdb_id: null })
+    expect(await getImdbId(550)).toBeNull()
+  })
+
+  it('devolve null quando o campo nem vem na resposta', async () => {
+    tmdbFetch.mockResolvedValue({})
+    expect(await getImdbId(550)).toBeNull()
+  })
+
+  it('usa o cache longo de detalhe, de 24 horas', async () => {
+    tmdbFetch.mockResolvedValue({ imdb_id: 'tt0137523' })
+    await getImdbId(550)
+    const [, , revalidate] = tmdbFetch.mock.calls[0]
+    expect(revalidate).toBe(60 * 60 * 24)
   })
 })
