@@ -16,16 +16,23 @@ export const TAMANHO_RANKING = 10
  * Desmarcar um serviço faz a fileira dele sumir — é a premissa do app
  * aparecendo na interface.
  */
-export function buildRailSpecs(selected: Provider[]): RailSpec[] {
+export function buildRailSpecs(
+  selected: Provider[],
+  /** Com filtro de nota a fileira pode entregar quatro filmes, e um título
+   *  que promete dez passaria a mentir — o mesmo cuidado que já impede o
+   *  ranking de remover o destaque do topo. */
+  hasRatingFilter = false,
+): RailSpec[] {
   const providers = selected.slice(0, MAX_PROVIDERS)
+  const quantos = hasRatingFilter ? 'Os' : 'Os 10'
 
   const popular: RailSpec = {
     key: 'popular',
     // Sem serviço marcado a fileira não é "sua": é o catálogo do país.
     title:
       providers.length === 0
-        ? 'Os 10 mais populares no Brasil'
-        : 'Os 10 mais populares nos seus streamings',
+        ? `${quantos} mais populares no Brasil`
+        : `${quantos} mais populares nos seus streamings`,
     providerIds: providers.map((p) => p.id),
   }
 

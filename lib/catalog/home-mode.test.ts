@@ -25,4 +25,16 @@ describe('resolveHomeMode', () => {
   it('é filtrado quando há gênero e ordenação juntos', () => {
     expect(resolveHomeMode({ genre: '27', sort: 'title.asc' })).toBe('filtered')
   })
+
+  it('continua em descoberta quando só a nota mínima foi escolhida', () => {
+    expect(resolveHomeMode({ rating: '8' })).toBe('discovery')
+  })
+
+  it('vai para a grade quando a nota vem junto de gênero', () => {
+    expect(resolveHomeMode({ rating: '8', genre: '27' })).toBe('filtered')
+  })
+
+  it('vai para a grade quando a nota vem junto de ordenação', () => {
+    expect(resolveHomeMode({ rating: '8', sort: 'title.asc' })).toBe('filtered')
+  })
 })

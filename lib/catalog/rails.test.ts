@@ -52,4 +52,25 @@ describe('buildRailSpecs', () => {
     const keys = rails.map((r) => r.key)
     expect(new Set(keys).size).toBe(keys.length)
   })
+
+  it('tira o número do título quando há filtro de nota, sem serviço marcado', () => {
+    const rails = buildRailSpecs([], true)
+    expect(rails[0].title).toBe('Os mais populares no Brasil')
+  })
+
+  it('tira o número do título quando há filtro de nota, com serviço marcado', () => {
+    const rails = buildRailSpecs([provider(8, 'Netflix')], true)
+    expect(rails[0].title).toBe('Os mais populares nos seus streamings')
+  })
+
+  it('mantém o número quando não há filtro de nota', () => {
+    expect(buildRailSpecs([], false)[0].title).toBe(
+      'Os 10 mais populares no Brasil',
+    )
+  })
+
+  it('não muda os títulos das fileiras de serviço', () => {
+    const rails = buildRailSpecs([provider(8, 'Netflix')], true)
+    expect(rails[1].title).toBe('Na Netflix')
+  })
 })

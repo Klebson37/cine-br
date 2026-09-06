@@ -3,6 +3,10 @@ export type HomeMode = 'discovery' | 'filtered'
 export interface HomeParams {
   genre?: string
   sort?: string
+  /** A nota mínima entra aqui mas **não** conta na decisão de modo: ela é
+   *  aplicada dentro das fileiras. Se trocasse o modo, o filtro nunca
+   *  apareceria no modo descoberta, que é justamente onde ele foi pedido. */
+  rating?: string
 }
 
 function isPresent(value: string | undefined): boolean {
