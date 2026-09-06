@@ -3,18 +3,29 @@ import {
   type AvailabilityLabel,
 } from '@/lib/catalog/search-availability'
 
-const STYLES: Record<AvailabilityLabel, string> = {
-  subscription: 'bg-emerald-500/20 text-emerald-300',
-  paid: 'bg-amber-500/20 text-amber-300',
-  unavailable: 'bg-neutral-700/40 text-neutral-400',
+/** Régua sob o pôster, não pílula flutuante: a largura da barra já diz
+ *  quanto o filme está ao seu alcance antes de a legenda ser lida. */
+const RULE: Record<AvailabilityLabel, string> = {
+  subscription: 'w-full bg-luz',
+  paid: 'w-1/3 bg-cobranca/80',
+  unavailable: 'w-[15%] bg-borda',
+}
+
+const TEXT: Record<AvailabilityLabel, string> = {
+  subscription: 'text-luz',
+  paid: 'text-cobranca/90',
+  unavailable: 'text-nevoa',
 }
 
 export function AvailabilityBadge({ label }: { label: AvailabilityLabel }) {
   return (
-    <span
-      className={`mt-1 inline-block rounded px-2 py-0.5 text-[10px] ${STYLES[label]}`}
-    >
-      {AVAILABILITY_TEXT[label]}
+    <span className="mt-2 block">
+      <span className="block h-[3px] w-full bg-borda/40">
+        <span className={`block h-full ${RULE[label]}`} />
+      </span>
+      <span className={`mt-1.5 block text-[0.6875rem] ${TEXT[label]}`}>
+        {AVAILABILITY_TEXT[label]}
+      </span>
     </span>
   )
 }

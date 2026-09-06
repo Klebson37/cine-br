@@ -7,14 +7,16 @@ export function Trailer({ youtubeKey }: TrailerProps) {
   if (!youtubeKey) return null
 
   return (
-    <section className="mt-8">
-      <h2 className="mb-4 text-xl font-semibold">Trailer</h2>
-      <div className="aspect-video overflow-hidden rounded-lg">
+    <section>
+      <h2 className="titulo-secao text-lg text-projecao">Trailer</h2>
+      <div className="mt-4 aspect-video overflow-hidden rounded-sm border border-borda bg-sala">
         <iframe
           title="Trailer"
-          src={`https://www.youtube.com/embed/${youtubeKey}`}
+          src={`https://www.youtube-nocookie.com/embed/${youtubeKey}`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
           allowFullScreen
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
           className="h-full w-full"
         />
       </div>

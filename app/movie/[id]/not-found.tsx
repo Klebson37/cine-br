@@ -2,11 +2,16 @@ import Link from 'next/link'
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center gap-4 py-20 text-center">
-      <p className="text-lg text-neutral-200">Filme não encontrado.</p>
+    <div className="wrap pt-16">
+      <p className="panoramico max-w-[20ch] text-3xl font-semibold leading-tight text-projecao">
+        Esse filme não está no catálogo.
+      </p>
+      <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-nevoa">
+        O endereço pode estar errado ou o título saiu do TMDB.
+      </p>
       <Link
         href="/"
-        className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-neutral-950"
+        className="mt-6 inline-block rounded-sm border border-borda px-5 py-2.5 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
       >
         Voltar ao catálogo
       </Link>

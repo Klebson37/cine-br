@@ -211,3 +211,27 @@ describe('getRegionProviders', () => {
     expect(providers[0].name).toBe('Netflix')
   })
 })
+
+describe('entradas sem pôster', () => {
+  afterEach(() => vi.clearAllMocks())
+
+  it('tira da descoberta o que não tem pôster', async () => {
+    tmdbFetch.mockResolvedValue(
+      paginated([RAW, { ...RAW, id: 551, poster_path: null }]),
+    )
+
+    const movies = await discoverMovies({})
+
+    expect(movies.map((m) => m.id)).toEqual([550])
+  })
+
+  it('tira da busca o que não tem pôster', async () => {
+    tmdbFetch.mockResolvedValue(
+      paginated([{ ...RAW, id: 552, poster_path: null }, RAW]),
+    )
+
+    const movies = await searchMovies('qualquer coisa')
+
+    expect(movies.map((m) => m.id)).toEqual([550])
+  })
+})

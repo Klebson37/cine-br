@@ -1,9 +1,12 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { MetaLine } from '@/components/catalog/MetaLine'
 import { CastList } from '@/components/movie/CastList'
 import { Trailer } from '@/components/movie/Trailer'
 import { WhereToWatch } from '@/components/movie/WhereToWatch'
+import { formatRating, formatRuntime } from '@/lib/catalog/format'
 import { getMovieDetail } from '@/lib/catalog/queries'
+import { readSelectedProviderIds } from '@/lib/preferences.server'
 
 interface MoviePageProps {
   params: Promise<{ id: string }>
@@ -14,45 +17,93 @@ export default async function MoviePage({ params }: MoviePageProps) {
   const movieId = Number.parseInt(id, 10)
   if (!Number.isInteger(movieId) || movieId <= 0) notFound()
 
-  const movie = await getMovieDetail(movieId)
+  const [movie, selectedIds] = await Promise.all([
+    getMovieDetail(movieId),
+    readSelectedProviderIds(),
+  ])
   if (!movie) notFound()
 
   return (
     <article>
-      <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="relative aspect-[2/3] w-full max-w-56 shrink-0 overflow-hidden rounded-lg bg-neutral-900">
-          {movie.posterUrl && (
-            <Image
-              src={movie.posterUrl}
-              alt={movie.title}
-              fill
-              sizes="224px"
-              className="object-cover"
+      {movie.backdropUrl && (
+        <div className="arte-topo relative h-[calc(38vh+var(--cabecalho))] max-h-[30rem] min-h-[18rem] w-full overflow-hidden">
+          <Image
+            src={movie.backdropUrl}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[50%_25%]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_80%_at_70%_25%,transparent_0%,rgba(21,15,34,0.5)_60%,rgba(21,15,34,0.95)_100%)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tinta via-tinta/60 to-transparent"
+          />
+        </div>
+      )}
+
+      <div
+        className={`wrap relative ${movie.backdropUrl ? '-mt-24' : 'pt-12'}`}
+      >
+        <div className="flex flex-col gap-8 sm:flex-row sm:items-end">
+          {/* O pôster sobe para dentro do panorama: a página começa no filme. */}
+          <div className="relative aspect-[2/3] w-36 shrink-0 overflow-hidden rounded-[2px] bg-sala ring-1 ring-inset ring-borda sm:w-52">
+            {movie.posterUrl && (
+              <Image
+                src={movie.posterUrl}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 9rem, 13rem"
+                className="object-cover"
+              />
+            )}
+          </div>
+
+          <div className="min-w-0 pb-1">
+            <h1 className="panoramico text-[clamp(1.875rem,4.5vw,3.5rem)] font-bold leading-[1] text-projecao">
+              {movie.title}
+            </h1>
+            <MetaLine
+              className="mt-4 text-sm text-nevoa"
+              items={[
+                movie.year !== null ? String(movie.year) : null,
+                formatRuntime(movie.runtimeMinutes),
+                formatRating(movie.rating),
+              ]}
             />
-          )}
+          </div>
         </div>
 
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">{movie.title}</h1>
-          <p className="mt-1 text-sm text-neutral-400">
-            {movie.year !== null && <span>{movie.year}</span>}
-            {movie.rating !== null && (
-              <span className="ml-3">★ {movie.rating.toFixed(1)}</span>
-            )}
-            {movie.runtimeMinutes !== null && (
-              <span className="ml-3">{movie.runtimeMinutes} min</span>
-            )}
+        {movie.overview && (
+          <p className="mt-8 max-w-[64ch] leading-relaxed text-projecao/85">
+            {movie.overview}
           </p>
-          <p className="mt-4 text-neutral-200">{movie.overview}</p>
+        )}
+
+        {/* Onde assistir vem primeiro no HTML porque é a razão do app; no
+            desktop ele vai para a coluna da direita e fica visível junto
+            com o trailer. */}
+        <div className="mt-12 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_23rem]">
+          <div className="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
+            <WhereToWatch
+              availability={movie.availability}
+              selectedIds={selectedIds}
+            />
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-1">
+            <Trailer youtubeKey={movie.trailerYoutubeKey} />
+          </div>
+        </div>
+
+        <div className="mt-12">
+          <CastList cast={movie.cast} />
         </div>
       </div>
-
-      <div className="mt-8">
-        <WhereToWatch availability={movie.availability} />
-      </div>
-
-      <Trailer youtubeKey={movie.trailerYoutubeKey} />
-      <CastList cast={movie.cast} />
     </article>
   )
 }

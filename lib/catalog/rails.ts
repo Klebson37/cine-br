@@ -7,6 +7,10 @@ export interface RailSpec {
   providerIds: number[]
 }
 
+/** Quantos filmes a fileira de classificação mostra. O título promete
+ *  dez, então são dez. */
+export const TAMANHO_RANKING = 10
+
 /**
  * Uma fileira de populares somada a uma por serviço selecionado.
  * Desmarcar um serviço faz a fileira dele sumir — é a premissa do app
@@ -17,7 +21,11 @@ export function buildRailSpecs(selected: Provider[]): RailSpec[] {
 
   const popular: RailSpec = {
     key: 'popular',
-    title: 'Populares nos seus streamings',
+    // Sem serviço marcado a fileira não é "sua": é o catálogo do país.
+    title:
+      providers.length === 0
+        ? 'Os 10 mais populares no Brasil'
+        : 'Os 10 mais populares nos seus streamings',
     providerIds: providers.map((p) => p.id),
   }
 

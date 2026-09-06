@@ -12,12 +12,13 @@ describe('buildRailSpecs', () => {
     expect(rails).toHaveLength(1)
     expect(rails[0].key).toBe('popular')
     expect(rails[0].providerIds).toEqual([])
+    expect(rails[0].title).toBe('Os 10 mais populares no Brasil')
   })
 
   it('põe a fileira de populares em primeiro lugar', () => {
     const rails = buildRailSpecs([provider(8, 'Netflix')])
     expect(rails[0].key).toBe('popular')
-    expect(rails[0].title).toBe('Populares nos seus streamings')
+    expect(rails[0].title).toBe('Os 10 mais populares nos seus streamings')
     expect(rails[0].providerIds).toEqual([8])
   })
 

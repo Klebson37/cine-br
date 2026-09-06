@@ -26,6 +26,14 @@ export const CACHE = {
 
 export const DEFAULT_SORT = 'popularity.desc'
 
+/** Um card de catálogo é o pôster: sem arte ele vira um buraco na grade.
+ *  O TMDB devolve, no meio dos filmes, entradas sem pôster que quase sempre
+ *  são vídeos soltos catalogados como filme. Elas ficam de fora das listas;
+ *  a página de detalhe continua abrindo normalmente para quem chegar nela. */
+function comPoster(movies: Movie[]): Movie[] {
+  return movies.filter((movie) => movie.posterUrl !== null)
+}
+
 export interface DiscoverOptions {
   providerIds?: number[]
   genreId?: number
@@ -54,7 +62,7 @@ export async function discoverMovies({
     },
     CACHE.catalog,
   )
-  return data.results.map(toMovie)
+  return comPoster(data.results.map(toMovie))
 }
 
 /** O BR devolve 86 provedores, a maioria canais irrelevantes. A ordenação
@@ -130,5 +138,5 @@ export async function searchMovies(query: string, page = 1): Promise<Movie[]> {
     { query, page, include_adult: 'false' },
     CACHE.catalog,
   )
-  return data.results.map(toMovie)
+  return comPoster(data.results.map(toMovie))
 }

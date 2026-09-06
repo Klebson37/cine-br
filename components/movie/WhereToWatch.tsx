@@ -3,43 +3,48 @@ import type { Availability, Provider } from '@/lib/catalog/types'
 
 interface WhereToWatchProps {
   availability: Availability
+  /** Serviços que o usuário assina. Sem eles, não dá para dizer "sua"
+   *  assinatura — e o dourado só vale para o que ele já paga. */
+  selectedIds?: number[]
 }
 
 function ProviderList({
   label,
   providers,
-  highlight = false,
+  incluido = false,
 }: {
   label: string
   providers: Provider[]
-  highlight?: boolean
+  incluido?: boolean
 }) {
   if (providers.length === 0) return null
 
   return (
-    <div className="mb-4">
+    <div
+      className={`border-l-[3px] pl-4 ${incluido ? 'border-luz' : 'border-borda'}`}
+    >
       <h3
-        className={
-          highlight
-            ? 'mb-2 text-sm font-semibold text-emerald-400'
-            : 'mb-2 text-sm text-neutral-400'
-        }
+        className={`text-sm font-medium ${incluido ? 'text-luz' : 'text-nevoa'}`}
       >
         {label}
       </h3>
-      <ul className="flex flex-wrap gap-3">
+      <ul className="mt-3 flex flex-wrap gap-2">
         {providers.map((provider) => (
           <li
             key={provider.id}
-            className="flex items-center gap-2 rounded bg-neutral-800 px-3 py-2 text-sm"
+            className={`flex items-center gap-2 rounded-sm border px-2.5 py-1.5 text-sm ${
+              incluido
+                ? 'border-luz/40 bg-luz/5 text-projecao'
+                : 'border-borda bg-tinta text-nevoa'
+            }`}
           >
             {provider.logoUrl && (
               <Image
                 src={provider.logoUrl}
                 alt=""
-                width={24}
-                height={24}
-                className="rounded"
+                width={22}
+                height={22}
+                className="rounded-[4px]"
               />
             )}
             {provider.name}
@@ -50,30 +55,45 @@ function ProviderList({
   )
 }
 
-export function WhereToWatch({ availability }: WhereToWatchProps) {
+export function WhereToWatch({
+  availability,
+  selectedIds,
+}: WhereToWatchProps) {
   const isEmpty =
     availability.flatrate.length === 0 &&
     availability.rent.length === 0 &&
     availability.buy.length === 0
 
+  // Sem lista de serviços assinados, toda assinatura conta como "sua".
+  const seus = selectedIds
+    ? availability.flatrate.filter((p) => selectedIds.includes(p.id))
+    : availability.flatrate
+  const outros = selectedIds
+    ? availability.flatrate.filter((p) => !selectedIds.includes(p.id))
+    : []
+
   return (
-    <section className="rounded-lg border border-neutral-800 p-5">
-      <h2 className="mb-4 text-xl font-semibold">Onde assistir</h2>
+    <section className="rounded-sm border border-borda bg-sala/60 p-6">
+      <h2 className="titulo-secao text-lg text-projecao">Onde assistir</h2>
 
       {isEmpty ? (
-        <p className="text-sm text-neutral-400">
+        <p className="mt-4 max-w-[46ch] text-sm leading-relaxed text-nevoa">
           Não está em nenhum streaming no Brasil no momento.
         </p>
       ) : (
-        <>
+        <div className="mt-6 space-y-7">
           <ProviderList
             label="Incluído na sua assinatura"
-            providers={availability.flatrate}
-            highlight
+            providers={seus}
+            incluido
+          />
+          <ProviderList
+            label="Em assinaturas que você não tem"
+            providers={outros}
           />
           <ProviderList label="Aluguel" providers={availability.rent} />
           <ProviderList label="Compra" providers={availability.buy} />
-        </>
+        </div>
       )}
     </section>
   )

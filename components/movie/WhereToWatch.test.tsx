@@ -40,3 +40,31 @@ describe('WhereToWatch', () => {
     ).toBeDefined()
   })
 })
+
+describe('WhereToWatch com os serviços do usuário', () => {
+  it('só chama de "sua" a assinatura que ele de fato tem', () => {
+    render(
+      <WhereToWatch
+        availability={availability({ flatrate: [netflix, appleTv] })}
+        selectedIds={[netflix.id]}
+      />,
+    )
+    expect(screen.getByText(/incluído na sua assinatura/i)).toBeDefined()
+    expect(
+      screen.getByText(/em assinaturas que você não tem/i),
+    ).toBeDefined()
+  })
+
+  it('não promete assinatura própria quando nenhuma delas é dele', () => {
+    render(
+      <WhereToWatch
+        availability={availability({ flatrate: [appleTv] })}
+        selectedIds={[netflix.id]}
+      />,
+    )
+    expect(screen.queryByText(/incluído na sua assinatura/i)).toBeNull()
+    expect(
+      screen.getByText(/em assinaturas que você não tem/i),
+    ).toBeDefined()
+  })
+})

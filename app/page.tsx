@@ -4,14 +4,15 @@ import { MovieRail } from '@/components/catalog/MovieRail'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { ProviderPanel } from '@/components/filters/ProviderPanel'
 import { resolveHomeMode } from '@/lib/catalog/home-mode'
-import { buildRailSpecs } from '@/lib/catalog/rails'
+import { TAMANHO_RANKING, buildRailSpecs } from '@/lib/catalog/rails'
 import {
   discoverMovies,
+  getAvailability,
   getGenres,
   getRegionProviders,
 } from '@/lib/catalog/queries'
-import type { Movie } from '@/lib/catalog/types'
-import { readSelectedProviderIds } from '@/lib/preferences'
+import type { Movie, Provider } from '@/lib/catalog/types'
+import { readSelectedProviderIds } from '@/lib/preferences.server'
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -38,7 +39,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <>
       {params.providers === 'open' && (
-        <div className="mb-6">
+        <div className="wrap pt-8">
           {/* getRegionProviders já devolve ordenado por prioridade no BR.
               São 86 no total; os 20 primeiros cobrem todos os relevantes. */}
           <ProviderPanel
@@ -49,7 +50,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       )}
 
       {mode === 'discovery' ? (
-        <DiscoveryMode selectedProviders={selectedProviders} genres={genres} />
+        <DiscoveryMode
+          selectedProviders={selectedProviders}
+          selectedCount={selectedIds.length}
+          genres={genres}
+        />
       ) : (
         <FilteredMode
           providerIds={selectedIds}
@@ -62,14 +67,35 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   )
 }
 
+/** Qual serviço já inclui o destaque. Prefere um que o usuário assina; sem
+ *  seleção, mostra o primeiro que tem o filme na assinatura. */
+async function resolveIncluded(
+  movie: Movie | undefined,
+  selectedIds: number[],
+): Promise<{ provider: Provider; mine: boolean } | null> {
+  if (!movie) return null
+
+  const availability = await getAvailability(movie.id).catch(() => null)
+  if (!availability) return null
+
+  const mine = availability.flatrate.find((p) => selectedIds.includes(p.id))
+  if (mine) return { provider: mine, mine: true }
+
+  const outro = availability.flatrate[0]
+  return outro ? { provider: outro, mine: false } : null
+}
+
 async function DiscoveryMode({
   selectedProviders,
+  selectedCount,
   genres,
 }: {
-  selectedProviders: Awaited<ReturnType<typeof getRegionProviders>>
+  selectedProviders: Provider[]
+  selectedCount: number
   genres: Awaited<ReturnType<typeof getGenres>>
 }) {
   const specs = buildRailSpecs(selectedProviders)
+  const byId = new Map(selectedProviders.map((p) => [p.id, p]))
 
   // Buscadas em paralelo. Uma fileira que falha vira lista vazia e some,
   // em vez de derrubar a home inteira.
@@ -82,18 +108,47 @@ async function DiscoveryMode({
   )
 
   const featured = results[0]?.[0]
+  const included = await resolveIncluded(
+    featured,
+    selectedProviders.map((p) => p.id),
+  )
+
   const rails = specs.map((spec, index) => ({
     spec,
-    movies: index === 0 ? results[0].slice(1) : results[index],
+    // A primeira fileira é uma classificação: mostra os dez primeiros na
+    // ordem exata, sem tirar o destaque do topo — tirar deslocaria todas as
+    // posições e a numeração passaria a mentir.
+    movies:
+      index === 0 ? results[0].slice(0, TAMANHO_RANKING) : results[index],
+    ranked: index === 0,
+    // Só as fileiras de um serviço só carregam a marca no título.
+    provider:
+      spec.providerIds.length === 1 ? byId.get(spec.providerIds[0]) : undefined,
   }))
 
   return (
     <>
-      <FeaturedMovie movie={featured} />
-      <FilterBar genres={genres} />
-      {rails.map(({ spec, movies }) => (
-        <MovieRail key={spec.key} title={spec.title} movies={movies} />
-      ))}
+      <FeaturedMovie
+        movie={featured}
+        selectedCount={selectedCount}
+        included={included}
+      />
+
+      <div className="wrap mt-6">
+        <FilterBar genres={genres} />
+      </div>
+
+      <div className="palco">
+        {rails.map(({ spec, movies, provider, ranked }) => (
+          <MovieRail
+            key={spec.key}
+            title={spec.title}
+            movies={movies}
+            provider={provider}
+            ranked={ranked}
+          />
+        ))}
+      </div>
     </>
   )
 }
@@ -116,9 +171,11 @@ async function FilteredMode({
   })
 
   return (
-    <>
+    <div className="wrap pt-10">
       <FilterBar genres={genres} activeGenre={genre} activeSort={sort} />
-      <MovieGrid movies={movies} />
-    </>
+      <div className="mt-10">
+        <MovieGrid movies={movies} />
+      </div>
+    </div>
   )
 }

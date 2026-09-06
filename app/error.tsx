@@ -2,17 +2,17 @@
 
 export default function Error({ reset }: { reset: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-4 py-20 text-center">
-      <p className="text-lg text-neutral-200">
-        Não conseguimos carregar o catálogo agora.
+    <div className="wrap pt-16">
+      <p className="panoramico max-w-[20ch] text-3xl font-semibold leading-tight text-projecao">
+        O catálogo não carregou.
       </p>
-      <p className="text-sm text-neutral-400">
-        Pode ser uma instabilidade temporária do TMDB.
+      <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-nevoa">
+        A fonte dos dados, o TMDB, não respondeu. Costuma ser passageiro.
       </p>
       <button
         type="button"
         onClick={reset}
-        className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-neutral-950"
+        className="mt-6 rounded-sm border border-borda px-5 py-2.5 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
       >
         Tentar de novo
       </button>

@@ -9,27 +9,34 @@ export function CastList({ cast }: CastListProps) {
   if (cast.length === 0) return null
 
   return (
-    <section className="mt-8">
-      <h2 className="mb-4 text-xl font-semibold">Elenco principal</h2>
-      <div className="flex gap-4 overflow-x-auto pb-2">
+    <section>
+      <h2 className="titulo-secao text-lg text-projecao">Elenco principal</h2>
+
+      <ul className="fita mt-4 flex gap-3 overflow-x-auto pb-3">
         {cast.map((member) => (
-          <div key={member.id} className="w-24 shrink-0 text-center">
-            <div className="relative mb-2 aspect-square overflow-hidden rounded-full bg-neutral-800">
+          <li key={member.id} className="w-[5.5rem] shrink-0">
+            {/* Retrato retangular, como os pôsteres: o mesmo objeto físico
+                em outra proporção, em vez de um avatar redondo. */}
+            <div className="relative aspect-[3/4] overflow-hidden rounded-[2px] bg-sala ring-1 ring-inset ring-borda/70">
               {member.photoUrl && (
                 <Image
                   src={member.photoUrl}
-                  alt={member.name}
+                  alt=""
                   fill
-                  sizes="96px"
+                  sizes="88px"
                   className="object-cover"
                 />
               )}
             </div>
-            <p className="text-xs text-neutral-200">{member.name}</p>
-            <p className="text-xs text-neutral-500">{member.character}</p>
-          </div>
+            <p className="mt-2 text-xs font-medium leading-snug text-projecao/85">
+              {member.name}
+            </p>
+            <p className="mt-0.5 text-xs leading-snug text-nevoa">
+              {member.character}
+            </p>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   )
 }

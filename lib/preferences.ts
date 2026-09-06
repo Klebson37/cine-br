@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers'
-
 /** Teto de provedores simultâneos. Segura o número de requisições da home. */
 export const MAX_PROVIDERS = 4
 export const PROVIDERS_COOKIE = 'providers'
@@ -21,9 +19,4 @@ export function parseProviderCookie(raw: string | undefined): number[] {
 
 export function serializeProviderCookie(ids: number[]): string {
   return normalize(ids).join(',')
-}
-
-export async function readSelectedProviderIds(): Promise<number[]> {
-  const store = await cookies()
-  return parseProviderCookie(store.get(PROVIDERS_COOKIE)?.value)
 }

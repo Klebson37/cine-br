@@ -3,21 +3,29 @@ import Link from 'next/link'
 interface EmptyStateProps {
   title?: string
   hint?: string
+  actionLabel?: string
+  actionHref?: string
 }
 
 export function EmptyState({
   title = 'Nenhum filme com esses filtros.',
-  hint = 'Tente remover o gênero ou incluir mais streamings.',
+  hint = 'Tire o gênero ou marque mais um streaming para abrir o catálogo.',
+  actionLabel = 'Limpar filtros',
+  actionHref = '/',
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-neutral-800 px-6 py-16 text-center">
-      <p className="text-lg font-medium text-neutral-200">{title}</p>
-      <p className="text-sm text-neutral-400">{hint}</p>
+    <div className="border-t border-borda py-14">
+      <p className="panoramico max-w-[24ch] text-2xl font-semibold leading-tight text-projecao">
+        {title}
+      </p>
+      <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-nevoa">
+        {hint}
+      </p>
       <Link
-        href="/"
-        className="mt-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-neutral-950"
+        href={actionHref}
+        className="mt-6 inline-block rounded-sm border border-borda px-5 py-2.5 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
       >
-        Limpar filtros
+        {actionLabel}
       </Link>
     </div>
   )
