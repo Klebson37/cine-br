@@ -1,0 +1,51 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Build do Next.js
+.next/
+out/
+build/
+dist/
+
+# Variáveis de ambiente — a chave do TMDB mora aqui, nunca commitar
+.env
+.env.local
+.env.*.local
+
+# Mockups e estado do companion visual do brainstorming
+.superpowers/
+
+# Cópias locais das skills do plugin superpowers (MIT).
+# Não são código do projeto — reinstaláveis via /plugin.
+.claude/skills/
+
+# Testes
+coverage/
+playwright-report/
+test-results/
+/blob-report/
+/playwright/.cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
