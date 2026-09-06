@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Copias locais das skills do plugin superpowers. Nao sao codigo do
+    // projeto e ja estao no .gitignore; sem isto o lint reprova por erros
+    // que nao temos como corrigir.
+    ".claude/**",
   ]),
 ]);
 
