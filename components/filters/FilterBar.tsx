@@ -1,9 +1,12 @@
+import { RATING_OPTIONS, type MinRating } from '@/lib/catalog/rating-filter'
 import type { Genre } from '@/lib/catalog/types'
 
 interface FilterBarProps {
   genres: Genre[]
   activeGenre?: string
   activeSort?: string
+  /** Já validada: a página converte o parâmetro cru antes de passar. */
+  activeRating?: MinRating | null
 }
 
 const SORT_OPTIONS = [
@@ -16,7 +19,12 @@ const SORT_OPTIONS = [
 const FIELD =
   'rounded-sm border border-borda bg-sala px-3 py-2 text-sm text-projecao'
 
-export function FilterBar({ genres, activeGenre, activeSort }: FilterBarProps) {
+export function FilterBar({
+  genres,
+  activeGenre,
+  activeSort,
+  activeRating,
+}: FilterBarProps) {
   return (
     <form action="/" className="flex flex-wrap items-center gap-3">
       <label className="sr-only" htmlFor="genre">
@@ -38,6 +46,25 @@ export function FilterBar({ genres, activeGenre, activeSort }: FilterBarProps) {
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
+          </option>
+        ))}
+      </select>
+
+      <label className="sr-only" htmlFor="rating">
+        Nota mínima
+      </label>
+      <select
+        id="rating"
+        name="rating"
+        defaultValue={activeRating?.toString() ?? ''}
+        className={FIELD}
+      >
+        <option value="">Qualquer nota</option>
+        {RATING_OPTIONS.map((nota) => (
+          // "ou mais" e não "acima de": a comparação inclui o próprio
+          // limite, e o rótulo não deve prometer uma exclusão que não faz.
+          <option key={nota} value={nota}>
+            Nota {nota} ou mais
           </option>
         ))}
       </select>
