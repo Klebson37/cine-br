@@ -425,6 +425,9 @@ export interface RawProvider {
   provider_id: number
   provider_name: string
   logo_path: string | null
+  /** Prioridade de exibição por país. O BR tem 86 provedores; sem ordenar
+   *  por isso, o painel mistura Netflix com "MGM+ Apple TV Channel". */
+  display_priorities?: Record<string, number>
 }
 
 export interface RawWatchProviders {
@@ -479,6 +482,10 @@ export interface RawGenre {
 export interface RawMovieDetail extends RawMovie {
   credits?: RawCredits
   videos?: RawVideos
+  /** Verificado contra a API: `watch/providers` É anexável via
+   *  append_to_response, apesar da barra. A página de detalhe faz
+   *  uma requisição só. */
+  'watch/providers'?: RawWatchProviders
 }
 ```
 
@@ -1028,6 +1035,7 @@ import {
   discoverMovies,
   getAvailability,
   getMovieDetail,
+  getRegionProviders,
   searchMovies,
 } from './queries'
 
@@ -1104,16 +1112,36 @@ describe('discoverMovies', () => {
 describe('getMovieDetail', () => {
   afterEach(() => vi.clearAllMocks())
 
-  it('anexa credits e videos numa requisição só', async () => {
+  it('traz elenco, vídeos e disponibilidade numa requisição só', async () => {
     tmdbFetch.mockResolvedValueOnce({ ...RAW, runtime: 139 })
-    tmdbFetch.mockResolvedValueOnce({ results: {} })
 
     await getMovieDetail(550)
 
+    expect(tmdbFetch).toHaveBeenCalledTimes(1)
     const [path, params] = tmdbFetch.mock.calls[0]
     expect(path).toBe('/movie/550')
-    expect(params.append_to_response).toBe('credits,videos')
+    expect(params.append_to_response).toBe('credits,videos,watch/providers')
     expect(params.include_video_language).toBe('pt,en,null')
+  })
+
+  it('lê a disponibilidade anexada', async () => {
+    tmdbFetch.mockResolvedValueOnce({
+      ...RAW,
+      runtime: 139,
+      'watch/providers': {
+        results: {
+          BR: {
+            flatrate: [
+              { provider_id: 8, provider_name: 'Netflix', logo_path: '/n.jpg' },
+            ],
+          },
+        },
+      },
+    })
+
+    const detail = await getMovieDetail(550)
+
+    expect(detail?.availability.flatrate[0].name).toBe('Netflix')
   })
 
   it('devolve null quando o filme não existe', async () => {
@@ -1126,9 +1154,8 @@ describe('getMovieDetail', () => {
     await expect(getMovieDetail(550)).rejects.toBeInstanceOf(TmdbError)
   })
 
-  it('devolve disponibilidade vazia quando a busca de provedores falha', async () => {
+  it('devolve disponibilidade vazia quando watch/providers não veio', async () => {
     tmdbFetch.mockResolvedValueOnce({ ...RAW, runtime: 139 })
-    tmdbFetch.mockRejectedValueOnce(new TmdbError('falhou', 500))
 
     const detail = await getMovieDetail(550)
 
@@ -1157,6 +1184,54 @@ describe('getAvailability', () => {
     tmdbFetch.mockResolvedValue({ results: {} })
     await getAvailability(550)
     expect(tmdbFetch.mock.calls[0][2]).toBe(21600)
+  })
+})
+
+describe('getRegionProviders', () => {
+  afterEach(() => vi.clearAllMocks())
+
+  it('ordena pela prioridade de exibição no Brasil', async () => {
+    tmdbFetch.mockResolvedValue({
+      results: [
+        {
+          provider_id: 2142,
+          provider_name: 'MGM+ Apple TV Channel',
+          logo_path: null,
+          display_priorities: { BR: 40 },
+        },
+        {
+          provider_id: 8,
+          provider_name: 'Netflix',
+          logo_path: null,
+          display_priorities: { BR: 0 },
+        },
+      ],
+    })
+
+    const providers = await getRegionProviders()
+
+    expect(providers.map((p) => p.name)).toEqual([
+      'Netflix',
+      'MGM+ Apple TV Channel',
+    ])
+  })
+
+  it('joga para o fim quem não tem prioridade definida no Brasil', async () => {
+    tmdbFetch.mockResolvedValue({
+      results: [
+        { provider_id: 1, provider_name: 'Sem prioridade', logo_path: null },
+        {
+          provider_id: 8,
+          provider_name: 'Netflix',
+          logo_path: null,
+          display_priorities: { BR: 0 },
+        },
+      ],
+    })
+
+    const providers = await getRegionProviders()
+
+    expect(providers[0].name).toBe('Netflix')
   })
 })
 ```
@@ -1230,13 +1305,21 @@ export async function discoverMovies({
   return data.results.map(toMovie)
 }
 
+/** O BR devolve 86 provedores, a maioria canais irrelevantes. A ordenação
+ *  por display_priorities.BR põe Netflix, Prime, Apple TV e Disney+ no topo. */
 export async function getRegionProviders(): Promise<Provider[]> {
   const data = await tmdbFetch<{ results: RawProvider[] }>(
     '/watch/providers/movie',
     { watch_region: WATCH_REGION },
     CACHE.providers,
   )
-  return data.results.map(toProvider)
+  return [...data.results]
+    .sort(
+      (a, b) =>
+        (a.display_priorities?.[WATCH_REGION] ?? Number.MAX_SAFE_INTEGER) -
+        (b.display_priorities?.[WATCH_REGION] ?? Number.MAX_SAFE_INTEGER),
+    )
+    .map(toProvider)
 }
 
 export async function getGenres(): Promise<Genre[]> {
@@ -1260,10 +1343,12 @@ export async function getAvailability(id: number): Promise<Availability> {
 export async function getMovieDetail(id: number): Promise<MovieDetail | null> {
   let raw: RawMovieDetail
   try {
+    // Uma requisição para a página inteira. Verificado contra a API:
+    // watch/providers é anexável apesar da barra no nome.
     raw = await tmdbFetch<RawMovieDetail>(
       `/movie/${id}`,
       {
-        append_to_response: 'credits,videos',
+        append_to_response: 'credits,videos,watch/providers',
         include_video_language: 'pt,en,null',
       },
       CACHE.detail,
@@ -1273,17 +1358,13 @@ export async function getMovieDetail(id: number): Promise<MovieDetail | null> {
     throw error
   }
 
-  // A disponibilidade é a informação central da página, mas sua ausência não
-  // justifica derrubar tudo: sem ela o bloco mostra "não está em streaming".
-  const availability = await getAvailability(id).catch(() => ({
-    flatrate: [],
-    rent: [],
-    buy: [],
-  }))
+  const rawProviders = raw['watch/providers']
 
   return {
     ...toMovie(raw),
-    availability,
+    availability: rawProviders
+      ? toAvailability(rawProviders)
+      : { flatrate: [], rent: [], buy: [] },
     trailerYoutubeKey: pickTrailerKey(raw.videos),
     cast: toCast(raw.credits),
   }
@@ -2360,8 +2441,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <>
       {params.providers === 'open' && (
         <div className="mb-6">
+          {/* getRegionProviders já devolve ordenado por prioridade no BR.
+              São 86 no total; os 20 primeiros cobrem todos os relevantes. */}
           <ProviderPanel
-            providers={allProviders.slice(0, 24)}
+            providers={allProviders.slice(0, 20)}
             selectedIds={selectedIds}
           />
         </div>
@@ -2480,19 +2563,13 @@ git commit -m "feat: adiciona home com modo descoberta e modo filtrado"
   - `<Trailer youtubeKey={string | null} />`
   - `<CastList cast={CastMember[]} />`
 
-- [ ] **Step 1: Validar se `watch/providers` pode ser anexado**
+> **Pendência já resolvida.** A verificação que o spec deixou em aberto foi
+> feita contra a API real em 2026-09-06: `watch/providers` **é** anexável via
+> `append_to_response`, apesar da barra no nome. A `getMovieDetail` da Task 5
+> já reflete isso — a página de detalhe faz **uma requisição**. Nenhuma ação
+> necessária aqui.
 
-O spec deixou isso em aberto. Descobrir agora, porque decide se a página faz uma ou duas requisições.
-
-```bash
-curl -s -H "Authorization: Bearer $TMDB_ACCESS_TOKEN" \
-  "https://api.themoviedb.org/3/movie/550?language=pt-BR&append_to_response=credits,videos,watch/providers" \
-  | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const j=JSON.parse(d);console.log('watch/providers presente:', Boolean(j['watch/providers']))})"
-```
-
-Se imprimir `true`, acrescentar `watch/providers` ao `append_to_response` em `getMovieDetail` e remover a chamada separada a `getAvailability`. Se imprimir `false`, manter as duas chamadas como estão. **Anotar o resultado no commit.**
-
-- [ ] **Step 2: Escrever os testes de "Onde assistir"**
+- [ ] **Step 1: Escrever os testes de "Onde assistir"**
 
 Criar `components/movie/WhereToWatch.test.tsx`:
 
@@ -2541,7 +2618,7 @@ describe('WhereToWatch', () => {
 })
 ```
 
-- [ ] **Step 3: Escrever os testes do trailer**
+- [ ] **Step 2: Escrever os testes do trailer**
 
 Criar `components/movie/Trailer.test.tsx`:
 
@@ -2564,12 +2641,12 @@ describe('Trailer', () => {
 })
 ```
 
-- [ ] **Step 4: Rodar e verificar que falham**
+- [ ] **Step 3: Rodar e verificar que falham**
 
 Run: `npx vitest run components/movie`
 Expected: FAIL — módulos não encontrados.
 
-- [ ] **Step 5: Implementar "Onde assistir"**
+- [ ] **Step 4: Implementar "Onde assistir"**
 
 Criar `components/movie/WhereToWatch.tsx`:
 
@@ -2656,7 +2733,7 @@ export function WhereToWatch({ availability }: WhereToWatchProps) {
 }
 ```
 
-- [ ] **Step 6: Implementar o trailer**
+- [ ] **Step 5: Implementar o trailer**
 
 Criar `components/movie/Trailer.tsx`:
 
@@ -2686,7 +2763,7 @@ export function Trailer({ youtubeKey }: TrailerProps) {
 }
 ```
 
-- [ ] **Step 7: Implementar o elenco**
+- [ ] **Step 6: Implementar o elenco**
 
 Criar `components/movie/CastList.tsx`:
 
@@ -2728,7 +2805,7 @@ export function CastList({ cast }: CastListProps) {
 }
 ```
 
-- [ ] **Step 8: Implementar a página**
+- [ ] **Step 7: Implementar a página**
 
 Criar `app/movie/[id]/page.tsx`:
 
@@ -2793,12 +2870,12 @@ export default async function MoviePage({ params }: MoviePageProps) {
 }
 ```
 
-- [ ] **Step 9: Rodar os testes**
+- [ ] **Step 8: Rodar os testes**
 
 Run: `npx vitest run components/movie`
 Expected: PASS, 6 testes.
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add app/movie components/movie

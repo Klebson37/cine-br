@@ -120,7 +120,13 @@ O parâmetro `append_to_response` do `/movie/{id}` aceita, nas palavras da docum
 
 Nenhuma requisição adicional para os itens 4 e 5. O custo deles é de interface, não de rede.
 
-`/movie/{id}/watch/providers` é um endpoint dentro do mesmo namespace, então pela regra documentada deveria ser anexável da mesma forma, deixando a página inteira em uma requisição. A documentação não confirma o caso de caminhos com barra de forma explícita. **Validar no início da implementação:** se funcionar, uma requisição; se não, duas. Nada no design depende do resultado.
+**Verificado contra a API em 2026-09-06:** `watch/providers` **é** anexável, apesar da barra no nome. A consulta final é:
+
+```
+/movie/{id}?language=pt-BR&append_to_response=credits,videos,watch/providers&include_video_language=pt,en,null
+```
+
+A página de detalhe inteira — ficha, disponibilidade, trailer e elenco — sai de **uma requisição**.
 
 #### Trailer: o filtro de idioma esconde a maioria dos vídeos
 
@@ -214,7 +220,8 @@ Convenção: identificadores de código em inglês, interface e documentação e
 |---|---|---|
 | Fileira de populares e grade filtrada | `/discover/movie` | `with_watch_providers`, `watch_region=BR`, `with_watch_monetization_types=flatrate`, `with_genres`, `sort_by` |
 | Fileira de um serviço | `/discover/movie` | idem, com `with_watch_providers` de um único provedor |
-| Lista de streamings do Brasil | `/watch/providers/movie` | `watch_region=BR` |
+| Lista de streamings do Brasil | `/watch/providers/movie` | `watch_region=BR` — devolve 86 provedores; ordenar por `display_priorities.BR` |
+| Lista de gêneros | `/genre/movie/list` | alimenta o filtro de gênero |
 | Detalhe do filme | `/movie/{id}` | `append_to_response=credits,videos`, `include_video_language=pt,en,null` |
 | Disponibilidade | `/movie/{id}/watch/providers` | — |
 | Busca | `/search/movie` | `query` |
