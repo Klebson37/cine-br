@@ -2,8 +2,14 @@
   "name": "cine-br",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
+    "build:imdb": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-imdb-ratings.mts",
+    "predev": "npm run build:imdb",
     "dev": "next dev",
+    "prebuild": "npm run build:imdb",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

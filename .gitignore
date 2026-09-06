@@ -14,6 +14,9 @@ out/
 build/
 dist/
 
+# Indice de notas do IMDb — gerado por scripts/build-imdb-ratings.ts no build
+data/
+
 # Variáveis de ambiente — a chave do TMDB mora aqui, nunca commitar
 .env*
 !.env.local.example
