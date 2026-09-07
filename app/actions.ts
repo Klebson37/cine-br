@@ -4,6 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
+  MAIOR_IDADE_COOKIE,
+  MAIOR_IDADE_MAX_AGE,
+} from '@/lib/catalog/adulto'
+import {
   COOKIE_MAX_AGE_SECONDS,
   PROVIDERS_COOKIE,
   serializeProviderCookie,
@@ -80,5 +84,34 @@ export async function setMark(formData: FormData): Promise<void> {
 export async function signOut(): Promise<void> {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  redirect('/')
+}
+
+/**
+ * Abre a secao +18 depois da pessoa declarar a maioridade.
+ *
+ * Declaracao, nao verificacao: o conteudo e cinema com classificacao 18, o
+ * mesmo que qualquer streaming mostra sem pedir documento. Guardar foto de
+ * RG e selfie para liberar filme classificado seria juntar dado biometrico
+ * -- sensivel pela LGPD -- num balde que so serve de alvo, para proteger o
+ * que o proprio setor nao protege assim.
+ */
+export async function confirmarMaioridade(): Promise<void> {
+  const store = await cookies()
+  store.set(MAIOR_IDADE_COOKIE, '1', {
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: MAIOR_IDADE_MAX_AGE,
+    path: '/',
+  })
+  redirect('/mais18')
+}
+
+/** Fecha a secao de novo. Existe porque um aparelho e compartilhado com mais
+ *  gente, e sem saida a confirmacao valeria um ano para quem pegasse o
+ *  telefone depois. */
+export async function sairDoMais18(): Promise<void> {
+  const store = await cookies()
+  store.delete(MAIOR_IDADE_COOKIE)
   redirect('/')
 }

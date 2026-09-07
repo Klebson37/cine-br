@@ -8,8 +8,8 @@ interface FilterBarProps {
   activeSort?: string
   /** Já validada: a página converte o parâmetro cru antes de passar. */
   activeRating?: MinRating | null
-  /** Endereco da lista que os filtros recarregam: a home para filmes,
-   *  /series para series. */
+  /** Endereço da lista que os filtros recarregam: a home para filmes,
+   *  /series para séries. */
   base?: string
 }
 
@@ -20,11 +20,15 @@ const SORT_OPTIONS = [
   { value: 'title.asc', label: 'Título (A-Z)' },
 ]
 
-const FIELD =
-  'min-w-0 flex-1 basis-40 rounded-sm border border-borda bg-sala px-3 py-2 text-sm text-projecao sm:flex-none sm:basis-auto'
+/** O select cru do navegador era a única peça do site que o CSS não
+ *  alcançava: vinha com o cinza e o canto do sistema, no meio de uma
+ *  interface de pílulas. `appearance-none` devolve a caixa, e a seta passa a
+ *  ser desenhada aqui — a mesma em qualquer navegador. */
+const CAMPO =
+  'peer h-10 w-full min-w-0 cursor-pointer appearance-none rounded-full border border-projecao/15 bg-projecao/[0.06] pl-10 pr-9 text-sm text-projecao backdrop-blur-md transition-colors hover:border-projecao/30 focus:border-luz/60 focus:bg-projecao/[0.11] focus:outline-none'
 
 const CHIP =
-  'inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors'
+  'inline-flex h-9 items-center gap-1 rounded-full border px-3.5 text-sm transition-colors'
 
 /** Monta o endereço da faixa de nota preservando os outros filtros: trocar
  *  a nota não pode apagar o gênero que a pessoa já escolheu. */
@@ -42,6 +46,45 @@ function ratingHref(
   return query === '' ? base : `${base}?${query}`
 }
 
+/** Um campo: ícone à esquerda, seta à direita, select transparente no meio.
+ *  O ícone acende junto com a borda quando o campo recebe o foco, para o
+ *  campo ativo se identificar sem depender só da cor da linha. */
+function Campo({
+  icone,
+  children,
+}: {
+  icone: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="relative min-w-0 flex-1 basis-44 sm:flex-none sm:basis-auto">
+      {children}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-nevoa transition-colors peer-hover:text-projecao/70 peer-focus:text-luz"
+      >
+        {icone}
+      </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-nevoa transition-colors peer-focus:text-luz"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="size-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </span>
+    </div>
+  )
+}
+
 export function FilterBar({
   genres,
   activeGenre,
@@ -56,39 +99,43 @@ export function FilterBar({
 
   return (
     <div className="flex flex-col gap-4">
-      <form action={base} className="flex flex-wrap items-center gap-3">
+      <form action={base} className="flex flex-wrap items-center gap-2.5">
         <label className="sr-only" htmlFor="genre">
           Gênero
         </label>
-        <select
-          id="genre"
-          name="genre"
-          defaultValue={activeGenre ?? ''}
-          className={FIELD}
-        >
-          <option value="">Todos os gêneros</option>
-          {genres.map((genre) => (
-            <option key={genre.id} value={genre.id}>
-              {genre.name}
-            </option>
-          ))}
-        </select>
+        <Campo icone={<Mascaras />}>
+          <select
+            id="genre"
+            name="genre"
+            defaultValue={activeGenre ?? ''}
+            className={CAMPO}
+          >
+            <option value="">Todos os gêneros</option>
+            {genres.map((genre) => (
+              <option key={genre.id} value={genre.id}>
+                {genre.name}
+              </option>
+            ))}
+          </select>
+        </Campo>
 
         <label className="sr-only" htmlFor="sort">
           Ordenar por
         </label>
-        <select
-          id="sort"
-          name="sort"
-          defaultValue={activeSort ?? ''}
-          className={FIELD}
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Campo icone={<Ordem />}>
+          <select
+            id="sort"
+            name="sort"
+            defaultValue={activeSort ?? ''}
+            className={CAMPO}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </Campo>
 
         {/* A nota saiu do formulário e virou link, mas precisa sobreviver ao
             envio dos outros filtros — daí o campo oculto. */}
@@ -96,9 +143,11 @@ export function FilterBar({
           <input type="hidden" name="rating" value={activeRating} />
         )}
 
+        {/* Dourado, não vermelho: o vermelho do cabeçalho é do "Entrar", e um
+            segundo botão aceso na mesma tela desfaz os dois. */}
         <button
           type="submit"
-          className="shrink-0 rounded-sm border border-borda px-4 py-2 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-luz/45 bg-luz/[0.09] px-6 text-sm font-semibold text-luz transition-[background-color,border-color,box-shadow] hover:border-luz/80 hover:bg-luz/[0.16] hover:shadow-[0_0_24px_-8px_rgba(255,194,75,0.9)]"
         >
           Aplicar
         </button>
@@ -141,5 +190,42 @@ export function FilterBar({
         </div>
       </nav>
     </div>
+  )
+}
+
+/** Máscaras de teatro: o símbolo de gênero que não é uma letra. */
+function Mascaras() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-[1.05rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 5h9v6.5A4.5 4.5 0 0 1 8.5 16 4.5 4.5 0 0 1 4 11.5z" />
+      <path d="M6.5 8.7h.01M10.5 8.7h.01" />
+      <path d="M6.6 12.2c.9.7 2 .7 2.9 0" />
+      <path d="M15 7h5v5.5a4 4 0 0 1-4 4" />
+    </svg>
+  )
+}
+
+/** Três barras decrescentes: ordenação, sem depender de texto. */
+function Ordem() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-[1.05rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 7h14M5 12h9M5 17h5" />
+    </svg>
   )
 }

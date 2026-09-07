@@ -245,6 +245,26 @@ body::after {
   border-radius: 2px;
 }
 
+/* Pulso lento no acesso ao +18.
+   Piscar de verdade — ligar e desligar — é risco de convulsão para quem tem
+   epilepsia fotossensível, e a WCAG barra acima de três vezes por segundo.
+   Além disso é a linguagem de banner de golpe, que faria o site parecer
+   menos confiável justamente na porta que pede confiança. Um halo que
+   respira chama o olho igual e não apaga nunca. */
+@keyframes pulso-18 {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-cortina) 34%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 20px 3px color-mix(in srgb, var(--color-cortina) 48%, transparent);
+  }
+}
+
+.pulso-18 {
+  animation: pulso-18 2600ms ease-in-out infinite;
+}
+
 /* A única sequência não disparada pelo usuário: a abertura do herói. A arte
    assenta enquanto o texto sobe, em dois tempos. */
 @keyframes assenta {

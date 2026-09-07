@@ -73,9 +73,40 @@ export function Header({ selectedCount, user }: HeaderProps) {
           </span>
         </Link>
 
+        {/* Ao lado dos streamings, com cadeado: a porta e visivel antes de
+            ser aberta, e ninguem entra sem saber que entrou. Contornado, nao
+            preenchido — o vermelho cheio ao lado e do Entrar, e dois botoes
+            cheios na mesma barra desfazem os dois. */}
+        <Link
+          href="/mais18"
+          aria-label="Secao mais 18, conteudo classificado para adultos"
+          className="pulso-18 inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-cortina/50 bg-cortina/10 px-2.5 text-sm font-semibold text-cortina backdrop-blur-md transition-colors hover:border-cortina hover:bg-cortina/20 sm:px-3.5"
+        >
+          <Cadeado />
+          +18
+        </Link>
+
         <AuthButton user={user} />
       </div>
     </header>
+  )
+}
+
+function Cadeado() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className="size-[0.95rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
+      <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" />
+    </svg>
   )
 }
 
@@ -99,7 +130,11 @@ function Marca() {
           <path d="M8 5.4v13.2L19 12z" />
         </svg>
       </span>
-      <span className="flex items-baseline">
+      {/* No celular fica so o sinal: com a palavra, os cinco controles da
+          barra somavam 412px para 350 disponiveis, e o ultimo vazava para
+          fora da tela. O sinal vermelho sozinho ja identifica e leva para
+          casa, como faz qualquer aplicativo. */}
+      <span className="hidden items-baseline sm:flex">
         <span className="panoramico">Cine</span>
         <span className="font-normal text-nevoa">BR</span>
       </span>
