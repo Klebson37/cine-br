@@ -16,9 +16,19 @@ interface MovieCardProps {
    *  form ou button dentro de um <a> é HTML inválido, quebra a navegação
    *  por teclado e faz o clique navegar para o filme junto. */
   action?: React.ReactNode
+  /** Raiz da rota do titulo. Series e filmes tem paginas separadas porque
+   *  os ids do TMDB sao numeracoes independentes: o 1399 de um nao e o
+   *  1399 do outro. */
+  base?: string
 }
 
-export function MovieCard({ movie, availability, rank, action }: MovieCardProps) {
+export function MovieCard({
+  movie,
+  availability,
+  rank,
+  action,
+  base = '/movie',
+}: MovieCardProps) {
   const recuado = availability === 'paid' || availability === 'unavailable'
 
   return (
@@ -27,7 +37,7 @@ export function MovieCard({ movie, availability, rank, action }: MovieCardProps)
           com a imagem e escondia parte do cartaz. */}
       {action && <div className="mb-1.5 flex justify-end">{action}</div>}
 
-      <Link href={`/movie/${movie.id}`} className="block">
+      <Link href={`${base}/${movie.id}`} className="block">
         {rank !== undefined && (
           // A posição é decorativa para quem lê a tela: a ordem dos cartões
           // já é a própria classificação.

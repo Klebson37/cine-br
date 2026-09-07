@@ -84,3 +84,25 @@ export interface RawMovieDetail extends RawMovie {
    *  uma requisição só. */
   'watch/providers'?: RawWatchProviders
 }
+
+/** Serie no TMDB. O formato e quase o do filme, com dois nomes trocados:
+ *  `name` no lugar de `title` e `first_air_date` no lugar de
+ *  `release_date`. A duracao vem como lista, uma por formato de episodio. */
+export interface RawSeries {
+  id: number
+  name: string
+  overview: string
+  poster_path: string | null
+  backdrop_path: string | null
+  first_air_date?: string
+  vote_average: number
+  vote_count: number
+  episode_run_time?: number[]
+  number_of_seasons?: number
+}
+
+export interface RawSeriesDetail extends RawSeries {
+  credits?: RawCredits
+  videos?: RawVideos
+  'watch/providers'?: RawWatchProviders
+}

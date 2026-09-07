@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { ListTabs } from './ListTabs'
 
 describe('ListTabs', () => {
-  it('mostra as tres abas', () => {
+  it('mostra as quatro abas', () => {
     render(<ListTabs active="discover" />)
-    expect(screen.getByRole('link', { name: 'Descobrir' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Filmes' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Séries' })).toBeDefined()
     expect(screen.getByRole('link', { name: 'Quero assistir' })).toBeDefined()
     expect(screen.getByRole('link', { name: 'Já assisti' })).toBeDefined()
   })
@@ -13,8 +14,11 @@ describe('ListTabs', () => {
   it('aponta cada aba para a rota certa', () => {
     render(<ListTabs active="discover" />)
     expect(
-      screen.getByRole('link', { name: 'Descobrir' }).getAttribute('href'),
+      screen.getByRole('link', { name: 'Filmes' }).getAttribute('href'),
     ).toBe('/')
+    expect(
+      screen.getByRole('link', { name: 'Séries' }).getAttribute('href'),
+    ).toBe('/series')
     expect(
       screen.getByRole('link', { name: 'Quero assistir' }).getAttribute('href'),
     ).toBe('/quero-assistir')
@@ -32,6 +36,13 @@ describe('ListTabs', () => {
     ).toBe('page')
   })
 
+  it('marca a aba de series quando ela e a ativa', () => {
+    render(<ListTabs active="series" />)
+    expect(
+      screen.getByRole('link', { name: 'Séries' }).getAttribute('aria-current'),
+    ).toBe('page')
+  })
+
   it('marca apenas uma aba como ativa', () => {
     render(<ListTabs active="watched" />)
     const marcadas = screen
@@ -42,6 +53,6 @@ describe('ListTabs', () => {
 
   it('e uma navegacao nomeada', () => {
     render(<ListTabs active="discover" />)
-    expect(screen.getByRole('navigation', { name: /listas/i })).toBeDefined()
+    expect(screen.getByRole('navigation', { name: /seções/i })).toBeDefined()
   })
 })

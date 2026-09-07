@@ -12,12 +12,15 @@ interface FeaturedMovieProps {
   /** Serviço que inclui o filme. Só acende em dourado quando é um dos
    *  serviços que o usuário assina — dourado significa "você já paga". */
   included?: { provider: Provider; mine: boolean } | null
+  /** Raiz da rota do titulo em destaque. */
+  base?: string
 }
 
 export function FeaturedMovie({
   movie,
   selectedCount,
   included,
+  base = '/movie',
 }: FeaturedMovieProps) {
   // Sem filme não há destaque; sem imagem, um destaque vazio pareceria erro.
   if (!movie) return null
@@ -91,7 +94,7 @@ export function FeaturedMovie({
 
         <div className="entra-tarde mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
           <Link
-            href={`/movie/${movie.id}`}
+            href={`${base}/${movie.id}`}
             className="rounded-sm bg-projecao px-7 py-3.5 text-sm font-semibold text-tinta shadow-[0_10px_40px_-12px_rgba(245,239,230,0.45)] transition-opacity hover:opacity-85"
           >
             Onde assistir

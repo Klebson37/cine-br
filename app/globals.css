@@ -222,6 +222,13 @@ body::after {
   scroll-snap-align: start;
 }
 
+/* Fita dentro de um bloco que já tem a goteira da página. Sem isto o
+   encaixe de rolagem pularia a margem uma segunda vez e o primeiro item
+   pararia fora da vista. */
+.fita-justa {
+  scroll-padding-left: 0;
+}
+
 .fita::-webkit-scrollbar {
   height: 6px;
 }

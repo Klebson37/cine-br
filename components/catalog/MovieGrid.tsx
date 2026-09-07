@@ -14,6 +14,8 @@ interface MovieGridProps {
    *  marcar — a home passa, a busca não. */
   marks?: ReadonlyMap<number, MarkState>
   signedIn?: boolean
+  /** Raiz da rota de cada titulo, repassada aos cartoes. */
+  base?: string
 }
 
 export function MovieGrid({
@@ -21,6 +23,7 @@ export function MovieGrid({
   availability,
   marks,
   signedIn = false,
+  base = '/movie',
 }: MovieGridProps) {
   if (movies.length === 0) return <EmptyState />
 
@@ -30,6 +33,7 @@ export function MovieGrid({
         <MovieCard
           key={movie.id}
           movie={movie}
+          base={base}
           availability={availability?.get(movie.id)}
           action={
             marks ? (

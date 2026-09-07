@@ -8,6 +8,9 @@ interface FilterBarProps {
   activeSort?: string
   /** Já validada: a página converte o parâmetro cru antes de passar. */
   activeRating?: MinRating | null
+  /** Endereco da lista que os filtros recarregam: a home para filmes,
+   *  /series para series. */
+  base?: string
 }
 
 const SORT_OPTIONS = [
@@ -26,6 +29,7 @@ const CHIP =
 /** Monta o endereço da faixa de nota preservando os outros filtros: trocar
  *  a nota não pode apagar o gênero que a pessoa já escolheu. */
 function ratingHref(
+  base: string,
   rating: MinRating | null,
   genre?: string,
   sort?: string,
@@ -35,7 +39,7 @@ function ratingHref(
   if (sort) params.set('sort', sort)
   if (rating !== null) params.set('rating', String(rating))
   const query = params.toString()
-  return query === '' ? '/' : `/?${query}`
+  return query === '' ? base : `${base}?${query}`
 }
 
 export function FilterBar({
@@ -43,6 +47,7 @@ export function FilterBar({
   activeGenre,
   activeSort,
   activeRating = null,
+  base = '/',
 }: FilterBarProps) {
   const faixas: { value: MinRating | null; label: string }[] = [
     { value: null, label: 'Todos' },
@@ -51,7 +56,7 @@ export function FilterBar({
 
   return (
     <div className="flex flex-col gap-4">
-      <form action="/" className="flex flex-wrap items-center gap-3">
+      <form action={base} className="flex flex-wrap items-center gap-3">
         <label className="sr-only" htmlFor="genre">
           Gênero
         </label>
@@ -116,7 +121,7 @@ export function FilterBar({
             return (
               <Link
                 key={faixa.label}
-                href={ratingHref(faixa.value, activeGenre, activeSort)}
+                href={ratingHref(base, faixa.value, activeGenre, activeSort)}
                 aria-current={ativa ? 'page' : undefined}
                 className={`${CHIP} ${
                   ativa

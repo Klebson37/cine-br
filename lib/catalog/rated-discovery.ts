@@ -1,6 +1,6 @@
 import { mapWithConcurrency } from '@/lib/concurrency'
 import { getImdbRating } from '@/lib/imdb/ratings'
-import { getImdbId } from './queries'
+import { getImdbId, type MediaKind } from './queries'
 import { filterByImdbRating, type MinRating } from './rating-filter'
 import type { Movie } from './types'
 
@@ -19,6 +19,7 @@ export const IMDB_LOOKUP_CONCURRENCY = 8
  */
 export async function resolveImdbRatings(
   tmdbIds: readonly number[],
+  kind: MediaKind = 'movie',
 ): Promise<Map<number, number | null>> {
   const unicos = [...new Set(tmdbIds)]
 
@@ -27,7 +28,7 @@ export async function resolveImdbRatings(
     IMDB_LOOKUP_CONCURRENCY,
     async (id) => {
       try {
-        const tconst = await getImdbId(id)
+        const tconst = await getImdbId(id, kind)
         return tconst === null ? null : getImdbRating(tconst)
       } catch {
         return null
@@ -44,15 +45,20 @@ export async function resolveImdbRatings(
 export async function applyRatingToRails(
   rails: readonly Movie[][],
   min: MinRating,
+  kind: MediaKind = 'movie',
 ): Promise<Movie[][]> {
-  const notas = await resolveImdbRatings(rails.flat().map((movie) => movie.id))
+  const notas = await resolveImdbRatings(
+    rails.flat().map((movie) => movie.id),
+    kind,
+  )
   return rails.map((movies) => filterByImdbRating(movies, notas, min))
 }
 
 export async function applyRatingToList(
   movies: readonly Movie[],
   min: MinRating,
+  kind: MediaKind = 'movie',
 ): Promise<Movie[]> {
-  const [filtrados] = await applyRatingToRails([[...movies]], min)
+  const [filtrados] = await applyRatingToRails([[...movies]], min, kind)
   return filtrados
 }

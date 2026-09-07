@@ -3,6 +3,7 @@ import type {
   RawCredits,
   RawMovie,
   RawProvider,
+  RawSeries,
   RawVideos,
   RawWatchProviders,
 } from '@/lib/tmdb/schema'
@@ -36,6 +37,28 @@ export function toMovie(raw: RawMovie): Movie {
     // Sem votos é ausência de informação, não nota ruim.
     rating: raw.vote_count > 0 ? raw.vote_average : null,
     runtimeMinutes: raw.runtime ?? null,
+  }
+}
+
+/** Uma serie no formato do catalogo.
+ *
+ *  Serie e filme sao o mesmo objeto de exibicao para este app: cartaz,
+ *  titulo, ano, nota. O que muda e a rota e a origem dos dados, nao a
+ *  forma -- e por isso a grade, a fileira e o cartao servem aos dois sem
+ *  saber com qual estao lidando.
+ *
+ *  A duracao vira a do episodio, que e o numero que ajuda a decidir se da
+ *  tempo hoje. A soma da serie inteira nao ajudaria ninguem. */
+export function toSeries(raw: RawSeries): Movie {
+  return {
+    id: raw.id,
+    title: raw.name,
+    year: parseYear(raw.first_air_date),
+    overview: raw.overview,
+    posterUrl: imageUrl(raw.poster_path, 'w500'),
+    backdropUrl: imageUrl(raw.backdrop_path, 'w1280'),
+    rating: raw.vote_count > 0 ? raw.vote_average : null,
+    runtimeMinutes: raw.episode_run_time?.[0] ?? null,
   }
 }
 

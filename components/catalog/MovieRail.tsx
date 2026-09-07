@@ -18,6 +18,8 @@ interface MovieRailProps {
    *  marcar em cada cartão, como em MovieGrid. */
   marks?: ReadonlyMap<number, MarkState>
   signedIn?: boolean
+  /** Raiz da rota de cada titulo, repassada aos cartoes. */
+  base?: string
 }
 
 export function MovieRail({
@@ -27,6 +29,7 @@ export function MovieRail({
   ranked = false,
   marks,
   signedIn = false,
+  base = '/movie',
 }: MovieRailProps) {
   // Um carrossel vazio rotulado "Na Netflix" comunica erro mesmo sem erro.
   if (movies.length === 0) return null
@@ -58,6 +61,7 @@ export function MovieRail({
           >
             <MovieCard
               movie={movie}
+              base={base}
               rank={ranked ? index + 1 : undefined}
               action={
                 marks ? (
