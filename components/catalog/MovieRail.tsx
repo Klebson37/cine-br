@@ -1,5 +1,7 @@
 import Image from 'next/image'
 import type { Movie, Provider } from '@/lib/catalog/types'
+import type { MarkState } from '@/lib/marks/types'
+import { MarkButton } from './MarkButton'
 import { MovieCard } from './MovieCard'
 import { RailStrip } from './RailStrip'
 
@@ -12,6 +14,10 @@ interface MovieRailProps {
   /** Fileira de ranking: os cartões recebem a posição. Só vale quando a
    *  ordem é mesmo uma classificação, não uma lista qualquer. */
   ranked?: boolean
+  /** Marcações da pessoa. A presença deste mapa é o que liga o botão de
+   *  marcar em cada cartão, como em MovieGrid. */
+  marks?: ReadonlyMap<number, MarkState>
+  signedIn?: boolean
 }
 
 export function MovieRail({
@@ -19,6 +25,8 @@ export function MovieRail({
   movies,
   provider,
   ranked = false,
+  marks,
+  signedIn = false,
 }: MovieRailProps) {
   // Um carrossel vazio rotulado "Na Netflix" comunica erro mesmo sem erro.
   if (movies.length === 0) return null
@@ -51,6 +59,15 @@ export function MovieRail({
             <MovieCard
               movie={movie}
               rank={ranked ? index + 1 : undefined}
+              action={
+                marks ? (
+                  <MarkButton
+                    movieId={movie.id}
+                    current={marks.get(movie.id) ?? null}
+                    signedIn={signedIn}
+                  />
+                ) : undefined
+              }
             />
           </div>
         ))}

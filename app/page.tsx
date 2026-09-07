@@ -22,6 +22,9 @@ import {
   type MinRating,
 } from '@/lib/catalog/rating-filter'
 import type { Movie, Provider } from '@/lib/catalog/types'
+import { ListTabs } from '@/components/layout/ListTabs'
+import { getCurrentUser, getMarks } from '@/lib/marks/queries'
+import type { MarkState } from '@/lib/marks/types'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
 
 interface HomePageProps {
@@ -39,10 +42,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // Convertida uma vez, aqui: daqui para baixo ninguém mais vê string.
   const minRating = parseMinRating(params.rating)
 
-  const [selectedIds, allProviders, genres] = await Promise.all([
+  const [selectedIds, allProviders, genres, marks, user] = await Promise.all([
     readSelectedProviderIds(),
     getRegionProviders(),
     getGenres(),
+    getMarks(),
+    getCurrentUser(),
   ])
 
   const selectedProviders = allProviders.filter((p) =>
@@ -68,6 +73,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           selectedCount={selectedIds.length}
           genres={genres}
           minRating={minRating}
+          marks={marks}
+          signedIn={user !== null}
         />
       ) : (
         <FilteredMode
@@ -76,6 +83,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           genre={params.genre}
           sort={params.sort}
           minRating={minRating}
+          marks={marks}
+          signedIn={user !== null}
         />
       )}
     </>
@@ -105,11 +114,15 @@ async function DiscoveryMode({
   selectedCount,
   genres,
   minRating,
+  marks,
+  signedIn,
 }: {
   selectedProviders: Provider[]
   selectedCount: number
   genres: Awaited<ReturnType<typeof getGenres>>
   minRating: MinRating | null
+  marks: ReadonlyMap<number, MarkState>
+  signedIn: boolean
 }) {
   const specs = buildRailSpecs(selectedProviders, minRating !== null)
   const byId = new Map(selectedProviders.map((p) => [p.id, p]))
@@ -160,7 +173,10 @@ async function DiscoveryMode({
       />
 
       <div className="wrap mt-6">
-        <FilterBar genres={genres} activeRating={minRating} />
+        <ListTabs active="discover" />
+        <div className="mt-6">
+          <FilterBar genres={genres} activeRating={minRating} />
+        </div>
       </div>
 
       <div className="palco">
@@ -171,6 +187,8 @@ async function DiscoveryMode({
             movies={movies}
             provider={provider}
             ranked={ranked}
+            marks={marks}
+            signedIn={signedIn}
           />
         ))}
       </div>
@@ -184,12 +202,16 @@ async function FilteredMode({
   genre,
   sort,
   minRating,
+  marks,
+  signedIn,
 }: {
   providerIds: number[]
   genres: Awaited<ReturnType<typeof getGenres>>
   genre?: string
   sort?: string
   minRating: MinRating | null
+  marks: ReadonlyMap<number, MarkState>
+  signedIn: boolean
 }) {
   const encontrados = await discoverMovies({
     providerIds,
@@ -207,14 +229,17 @@ async function FilteredMode({
 
   return (
     <div className="wrap pt-10">
-      <FilterBar
-        genres={genres}
-        activeGenre={genre}
-        activeSort={sort}
-        activeRating={minRating}
-      />
+      <ListTabs active="discover" />
+      <div className="mt-6">
+        <FilterBar
+          genres={genres}
+          activeGenre={genre}
+          activeSort={sort}
+          activeRating={minRating}
+        />
+      </div>
       <div className="mt-10">
-        <MovieGrid movies={movies} />
+        <MovieGrid movies={movies} marks={marks} signedIn={signedIn} />
       </div>
     </div>
   )
