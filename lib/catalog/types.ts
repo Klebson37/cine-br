@@ -20,6 +20,10 @@ export interface Movie {
 
 export interface Availability {
   flatrate: Provider[]
+  /** Servicos que nao cobram nada — com ou sem anuncio. Separado de
+   *  flatrate porque a interface diz "gratis" em vez de "sua assinatura",
+   *  e porque quem nao assina nada ainda assim tem o que ver. */
+  free: Provider[]
   rent: Provider[]
   buy: Provider[]
   /** Pagina do proprio TMDB com as opcoes daquele titulo no pais. Vinha na

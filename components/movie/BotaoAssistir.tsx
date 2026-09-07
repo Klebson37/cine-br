@@ -32,7 +32,9 @@ export function BotaoAssistir({
   // promessa quebrada ocupando espaço.
   if (opcao === null) return null
 
-  const minha = opcao.modo === 'minha'
+  // Aceso quando nao custa nada a mais: o que ela ja assina, ou o que e
+  // gratuito. Dourado no site inteiro quer dizer "isso e seu".
+  const aceso = opcao.modo === 'minha' || opcao.modo === 'gratis'
 
   return (
     <a
@@ -41,7 +43,7 @@ export function BotaoAssistir({
       rel="noopener noreferrer"
       aria-label={`${rotuloDeAssistir(opcao)} — abre em nova aba`}
       className={`group/assistir inline-flex h-10 shrink-0 items-center gap-2 rounded-sm px-4 text-sm font-semibold transition-all ${
-        minha
+        aceso
           ? 'bg-luz text-tinta shadow-[0_8px_24px_-8px_rgba(255,194,75,0.85)] hover:-translate-y-px hover:bg-[#ffcf6b]'
           : 'border border-projecao/25 bg-tinta/60 text-projecao backdrop-blur-md hover:border-luz/60 hover:text-luz'
       }`}

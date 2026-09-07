@@ -41,7 +41,23 @@ describe('discoverMovies', () => {
     const [path, params] = tmdbFetch.mock.calls[0]
     expect(path).toBe('/discover/movie')
     expect(params.watch_region).toBe('BR')
-    expect(params.with_watch_monetization_types).toBe('flatrate')
+    expect(params.with_watch_monetization_types).toBe('flatrate|free|ads')
+  })
+
+  it('pede o que é grátis junto com o que é assinatura', async () => {
+    await discoverMovies({})
+    const [, params] = tmdbFetch.mock.calls[0]
+    const tipos = String(params.with_watch_monetization_types).split('|')
+    expect(tipos).toContain('free')
+    expect(tipos).toContain('ads')
+  })
+
+  it('nunca pede aluguel nem compra: a premissa do site é não cobrar', async () => {
+    await discoverMovies({})
+    const [, params] = tmdbFetch.mock.calls[0]
+    const tipos = String(params.with_watch_monetization_types).split('|')
+    expect(tipos).not.toContain('rent')
+    expect(tipos).not.toContain('buy')
   })
 
   it('junta vários provedores com pipe, nunca com vírgula', async () => {
@@ -137,7 +153,13 @@ describe('getMovieDetail', () => {
 
     const detail = await getMovieDetail(550)
 
-    expect(detail?.availability).toEqual({ flatrate: [], rent: [], buy: [], link: null })
+    expect(detail?.availability).toEqual({
+      flatrate: [],
+      free: [],
+      rent: [],
+      buy: [],
+      link: null,
+    })
   })
 })
 

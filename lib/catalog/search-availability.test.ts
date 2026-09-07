@@ -7,7 +7,7 @@ const max = { id: 384, name: 'Max', logoUrl: null }
 const appleTv = { id: 2, name: 'Apple TV', logoUrl: null }
 
 function availability(overrides: Partial<Availability> = {}): Availability {
-  return { flatrate: [], rent: [], buy: [], link: null, ...overrides }
+  return { flatrate: [], free: [], rent: [], buy: [], link: null, ...overrides }
 }
 
 describe('classifyAvailability', () => {
@@ -37,5 +37,32 @@ describe('classifyAvailability', () => {
     expect(classifyAvailability(availability({ flatrate: [netflix] }), [])).toBe(
       'paid',
     )
+  })
+})
+
+describe('classifyAvailability — o que é de graça', () => {
+  const pluto = { id: 300, name: 'Pluto TV', logoUrl: null }
+
+  it('marca como grátis mesmo sem o serviço estar selecionado', () => {
+    expect(classifyAvailability(availability({ free: [pluto] }), [])).toBe(
+      'free',
+    )
+  })
+
+  it('nunca chama de pago o que é gratuito', () => {
+    const rotulo = classifyAvailability(
+      availability({ free: [pluto], rent: [appleTv] }),
+      [],
+    )
+    expect(rotulo).not.toBe('paid')
+  })
+
+  it('a assinatura da pessoa ainda vem primeiro', () => {
+    expect(
+      classifyAvailability(
+        availability({ flatrate: [netflix], free: [pluto] }),
+        [8],
+      ),
+    ).toBe('subscription')
   })
 })

@@ -8,7 +8,7 @@ const appleStore: Provider = { id: 2, name: 'Apple TV Store', logoUrl: null }
 const desconhecido: Provider = { id: 999999, name: 'Serviço X', logoUrl: null }
 
 function disp(over: Partial<Availability> = {}): Availability {
-  return { flatrate: [], rent: [], buy: [], link: null, ...over }
+  return { flatrate: [], free: [], rent: [], buy: [], link: null, ...over }
 }
 
 describe('melhorOpcaoParaAssistir', () => {
@@ -96,5 +96,51 @@ describe('rotuloDeAssistir', () => {
         rotuloDeAssistir({ provider: netflix, href: 'x', modo }),
       ).toBe(esperado)
     }
+  })
+})
+
+describe('melhorOpcaoParaAssistir — o que é de graça', () => {
+  const pluto: Provider = { id: 300, name: 'Pluto TV', logoUrl: null }
+
+  it('grátis vence assinatura que a pessoa não tem', () => {
+    // Mandar para uma tela de cadastro quando o filme está de graça em
+    // outro lugar seria o app custando dinheiro a quem deveria economizar.
+    const opcao = melhorOpcaoParaAssistir(
+      disp({ flatrate: [netflix], free: [pluto] }),
+      'Matrix',
+      [],
+    )
+    expect(opcao?.modo).toBe('gratis')
+    expect(opcao?.provider.name).toBe('Pluto TV')
+  })
+
+  it('mas a assinatura que ela já paga vence o grátis', () => {
+    const opcao = melhorOpcaoParaAssistir(
+      disp({ flatrate: [netflix], free: [pluto] }),
+      'Matrix',
+      [8],
+    )
+    expect(opcao?.modo).toBe('minha')
+  })
+
+  it('um grátis marcado no painel conta como dela', () => {
+    const opcao = melhorOpcaoParaAssistir(disp({ free: [pluto] }), 'Matrix', [
+      300,
+    ])
+    expect(opcao?.modo).toBe('minha')
+  })
+
+  it('grátis vence aluguel e compra', () => {
+    const opcao = melhorOpcaoParaAssistir(
+      disp({ free: [pluto], rent: [appleStore], buy: [appleStore] }),
+      'Matrix',
+    )
+    expect(opcao?.modo).toBe('gratis')
+  })
+
+  it('o rótulo avisa que não custa nada', () => {
+    expect(
+      rotuloDeAssistir({ provider: pluto, href: 'x', modo: 'gratis' }),
+    ).toBe('Assistir na Pluto TV — de graça')
   })
 })

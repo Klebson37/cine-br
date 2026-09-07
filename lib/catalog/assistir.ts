@@ -3,7 +3,12 @@ import { watchHref } from './watch-links'
 
 /** Como a pessoa chega no filme por aquele serviço. Muda o verbo do botão e
  *  o peso dele: só o que ela já paga merece destaque. */
-export type ModoDeAssistir = 'minha' | 'assinatura' | 'aluguel' | 'compra'
+export type ModoDeAssistir =
+  | 'minha'
+  | 'gratis'
+  | 'assinatura'
+  | 'aluguel'
+  | 'compra'
 
 export interface OpcaoAssistir {
   provider: Provider
@@ -27,10 +32,18 @@ export function melhorOpcaoParaAssistir(
   titulo: string,
   selectedIds: readonly number[] = [],
 ): OpcaoAssistir | null {
-  const minhas = availability.flatrate.filter((p) => selectedIds.includes(p.id))
+  // Um serviço grátis que a pessoa marcou também é "meu": ela já o escolheu,
+  // e não paga por ele.
+  const minhas = [...availability.flatrate, ...availability.free].filter((p) =>
+    selectedIds.includes(p.id),
+  )
 
   const candidatos: [Provider[], ModoDeAssistir][] = [
     [minhas, 'minha'],
+    // Grátis vem antes de uma assinatura que a pessoa não tem: mandá-la para
+    // uma tela de cadastro quando o filme está de graça em outro lugar seria
+    // o app custando dinheiro a quem ele deveria economizar.
+    [availability.free, 'gratis'],
     [availability.flatrate, 'assinatura'],
     [availability.rent, 'aluguel'],
     [availability.buy, 'compra'],
@@ -57,5 +70,8 @@ export function rotuloDeAssistir(opcao: OpcaoAssistir): string {
       : opcao.modo === 'compra'
         ? 'Comprar'
         : 'Assistir'
-  return `${verbo} na ${opcao.provider.name}`
+  const onde = `${verbo} na ${opcao.provider.name}`
+  // A gratuidade entra no rótulo, não numa legenda ao lado: é a informação
+  // que decide o clique.
+  return opcao.modo === 'gratis' ? `${onde} — de graça` : onde
 }

@@ -1,9 +1,14 @@
 import type { Availability } from './types'
 
-export type AvailabilityLabel = 'subscription' | 'paid' | 'unavailable'
+export type AvailabilityLabel =
+  | 'subscription'
+  | 'free'
+  | 'paid'
+  | 'unavailable'
 
 export const AVAILABILITY_TEXT: Record<AvailabilityLabel, string> = {
   subscription: 'Na sua assinatura',
+  free: 'De graça',
   paid: 'Aluguel ou compra',
   unavailable: 'Indisponível no Brasil',
 }
@@ -16,6 +21,11 @@ export function classifyAvailability(
     selectedIds.includes(provider.id),
   )
   if (inSubscription) return 'subscription'
+
+  // Grátis vem antes de "aluguel ou compra" mesmo quando o serviço não está
+  // marcado: não custa nada, então não há o que escolher — e chamar de
+  // "pago" o que é gratuito seria a pior mentira que este selo poderia dar.
+  if (availability.free.length > 0) return 'free'
 
   const anywhere =
     availability.flatrate.length > 0 ||

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { saveProviders } from '@/app/actions'
 import type { Provider } from '@/lib/catalog/types'
+import { ehGratis } from '@/lib/catalog/gratis'
 import { MAX_PROVIDERS } from '@/lib/preferences'
 
 interface ProviderPanelProps {
@@ -78,6 +79,13 @@ export function ProviderPanel({ providers, selectedIds }: ProviderPanelProps) {
                 />
               )}
               <span className="truncate text-projecao/90">{provider.name}</span>
+              {/* Dito no proprio item: marcar um servico sem saber que ele
+                  e gratuito esconde a melhor noticia que o app tem a dar. */}
+              {ehGratis(provider.id) && (
+                <span className="ml-auto shrink-0 rounded-full border border-luz/40 bg-luz/10 px-2 py-[0.1rem] text-[0.6875rem] font-semibold text-luz">
+                  Grátis
+                </span>
+              )}
             </label>
           )
         })}

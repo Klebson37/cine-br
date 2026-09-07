@@ -7,12 +7,16 @@ import {
  *  quanto o filme está ao seu alcance antes de a legenda ser lida. */
 const RULE: Record<AvailabilityLabel, string> = {
   subscription: 'w-full bg-luz',
+  // Barra cheia como a da assinatura: nao custa nada, entao esta tao ao
+  // alcance quanto o que a pessoa ja paga.
+  free: 'w-full bg-luz',
   paid: 'w-1/3 bg-cobranca/80',
   unavailable: 'w-[15%] bg-borda',
 }
 
 const TEXT: Record<AvailabilityLabel, string> = {
   subscription: 'text-luz',
+  free: 'text-luz',
   paid: 'text-cobranca/90',
   unavailable: 'text-nevoa',
 }

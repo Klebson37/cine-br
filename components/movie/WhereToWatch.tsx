@@ -15,12 +15,16 @@ function ProviderList({
   label,
   providers,
   incluido = false,
+  gratis = false,
   title,
   link,
 }: {
   label: string
   providers: Provider[]
   incluido?: boolean
+  /** Verde nao existe na paleta; gratis usa a mesma regua do incluido, com
+   *  o rotulo fazendo o trabalho de distinguir. */
+  gratis?: boolean
   title?: string
   link: string | null
 }) {
@@ -28,10 +32,14 @@ function ProviderList({
 
   return (
     <div
-      className={`border-l-[3px] pl-4 ${incluido ? 'border-luz' : 'border-borda'}`}
+      className={`border-l-[3px] pl-4 ${
+        incluido || gratis ? 'border-luz' : 'border-borda'
+      }`}
     >
       <h3
-        className={`text-sm font-medium ${incluido ? 'text-luz' : 'text-nevoa'}`}
+        className={`text-sm font-medium ${
+          incluido || gratis ? 'text-luz' : 'text-nevoa'
+        }`}
       >
         {label}
       </h3>
@@ -72,7 +80,7 @@ function ProviderList({
           )
 
           const base = `flex items-center gap-2 rounded-sm border px-2.5 py-1.5 text-sm ${
-            incluido
+            incluido || gratis
               ? 'border-luz/40 bg-luz/5 text-projecao'
               : 'border-borda bg-tinta text-nevoa'
           }`
@@ -90,7 +98,7 @@ function ProviderList({
                   rel="noopener noreferrer"
                   aria-label={`Assistir em ${provider.name} — abre em nova aba`}
                   className={`group/servico transition-colors ${base} ${
-                    incluido
+                    incluido || gratis
                       ? 'hover:border-luz hover:bg-luz/10'
                       : 'hover:border-nevoa/60 hover:text-projecao'
                   }`}
@@ -113,6 +121,7 @@ export function WhereToWatch({
 }: WhereToWatchProps) {
   const isEmpty =
     availability.flatrate.length === 0 &&
+    availability.free.length === 0 &&
     availability.rent.length === 0 &&
     availability.buy.length === 0
 
@@ -142,6 +151,9 @@ export function WhereToWatch({
             incluido
             {...comum}
           />
+          {/* Antes das assinaturas que a pessoa nao tem: nao custa nada,
+              entao e a melhor noticia da lista e nao deve ficar embaixo. */}
+          <ProviderList label="De graça" providers={availability.free} gratis {...comum} />
           <ProviderList
             label="Em assinaturas que você não tem"
             providers={outros}

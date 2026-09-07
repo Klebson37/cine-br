@@ -72,8 +72,16 @@ export function toAvailability(raw: RawWatchProviders): Availability {
   // A chave da região some por completo quando o filme não está disponível
   // no país. Isso é resposta legítima, não erro.
   const region = raw.results?.[WATCH_REGION]
+  // `free` e `ads` viram um so: para quem vai assistir, a diferenca entre
+  // gratis e gratis-com-anuncio nao muda a decisao de abrir o filme.
+  const gratis = [...(region?.free ?? []), ...(region?.ads ?? [])].map(
+    toProvider,
+  )
+  const unicos = new Map(gratis.map((p) => [p.id, p]))
+
   return {
     flatrate: (region?.flatrate ?? []).map(toProvider),
+    free: [...unicos.values()],
     rent: (region?.rent ?? []).map(toProvider),
     buy: (region?.buy ?? []).map(toProvider),
     link: region?.link ?? null,

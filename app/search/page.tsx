@@ -60,6 +60,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       label: classifyAvailability(
         await getAvailability(movie.id).catch(() => ({
           flatrate: [],
+          free: [],
           rent: [],
           buy: [],
           link: null,

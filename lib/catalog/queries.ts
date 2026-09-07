@@ -1,4 +1,5 @@
 import { TmdbError, WATCH_REGION, tmdbFetch } from '@/lib/tmdb/client'
+import { MONETIZACAO_INCLUIDA } from './gratis'
 import type {
   RawExternalIds,
   RawGenre,
@@ -70,7 +71,7 @@ export async function discoverMovies({
     '/discover/movie',
     {
       watch_region: WATCH_REGION,
-      with_watch_monetization_types: 'flatrate',
+      with_watch_monetization_types: MONETIZACAO_INCLUIDA,
       with_keywords: keywords,
       // Pipe significa OU. Vírgula significaria E — filmes presentes em
       // todos os serviços ao mesmo tempo, que não é o que o usuário quer.
@@ -164,7 +165,7 @@ export async function getMovieDetail(id: number): Promise<MovieDetail | null> {
     ...toMovie(raw),
     availability: rawProviders
       ? toAvailability(rawProviders)
-      : { flatrate: [], rent: [], buy: [], link: null },
+      : { flatrate: [], free: [], rent: [], buy: [], link: null },
     trailerYoutubeKey: pickTrailerKey(raw.videos),
     cast: toCast(raw.credits),
   }
@@ -198,7 +199,7 @@ export async function discoverSeries({
     '/discover/tv',
     {
       watch_region: WATCH_REGION,
-      with_watch_monetization_types: 'flatrate',
+      with_watch_monetization_types: MONETIZACAO_INCLUIDA,
       with_watch_providers:
         providerIds.length > 0 ? providerIds.join('|') : undefined,
       with_genres: genreId,
@@ -245,7 +246,7 @@ export async function getSeriesDetail(id: number): Promise<MovieDetail | null> {
     ...toSeries(raw),
     availability: rawProviders
       ? toAvailability(rawProviders)
-      : { flatrate: [], rent: [], buy: [], link: null },
+      : { flatrate: [], free: [], rent: [], buy: [], link: null },
     trailerYoutubeKey: pickTrailerKey(raw.videos),
     cast: toCast(raw.credits),
   }

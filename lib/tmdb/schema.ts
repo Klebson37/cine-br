@@ -29,6 +29,10 @@ export interface RawWatchProviders {
       flatrate?: RawProvider[]
       rent?: RawProvider[]
       buy?: RawProvider[]
+      /** Gratis de verdade, sem anuncio. Libreflix e JustWatch TV entram
+       *  aqui; Pluto TV e Mercado Play entram em `ads`. Para quem assiste a
+       *  diferenca e so o anuncio, entao o app junta os dois. */
+      free?: RawProvider[]
       ads?: RawProvider[]
     }
   >

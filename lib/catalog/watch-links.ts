@@ -24,12 +24,18 @@ const PRIME: Busca = (t) => `https://www.primevideo.com/search?phrase=${t}`
 const APPLE: Busca = (t) => `https://tv.apple.com/search?term=${t}`
 const MAX: Busca = (t) => `https://play.max.com/search?q=${t}`
 
-/** Ids conferidos contra /watch/providers/movie?watch_region=BR. */
+/** Ids conferidos contra /watch/providers/movie?watch_region=BR, e cada
+ *  endereço testado com uma requisição de verdade: só entra aqui o que
+ *  respondeu 200 com um termo de busca.
+ *
+ *  Disney+ e NetMovies ficaram de fora por isso — as duas exigem sessão e
+ *  devolvem 404 para qualquer caminho de busca aberto. Elas caem na página
+ *  do título no TMDB, que existe e leva adiante; inventar um endereço que
+ *  parece certo e dá erro seria pior que o desvio. */
 const POR_ID: Record<number, Busca> = {
   8: (t) => `https://www.netflix.com/search?q=${t}`,
   119: PRIME,
   350: APPLE,
-  337: (t) => `https://www.disneyplus.com/pt-br/search?q=${t}`,
   2285: (t) => `https://www.justwatch.com/br/busca?q=${t}`,
   167: (t) => `https://www.clarotvmais.com.br/busca?q=${t}`,
   484: (t) => `https://www.clarotvmais.com.br/busca?q=${t}`,
@@ -42,7 +48,13 @@ const POR_ID: Record<number, Busca> = {
   11: (t) => `https://mubi.com/pt/br/search/films?query=${t}`,
   10: (t) => `https://www.amazon.com.br/s?k=${t}&i=instant-video`,
   3: (t) => `https://play.google.com/store/search?q=${t}&c=movies`,
-  19: (t) => `https://www.netmovies.com.br/busca?q=${t}`,
+  // Os que não cobram assinatura. São o motivo de o painel ter passado a
+  // listá-los: sem endereço próprio, o botão "de graça" mandaria a pessoa
+  // para outro catálogo em vez de para o filme.
+  300: (t) => `https://pluto.tv/br/search?q=${t}`,
+  538: (t) => `https://watch.plex.tv/search?q=${t}`,
+  2077: (t) => `https://watch.plex.tv/search?q=${t}`,
+  544: (t) => `https://libreflix.org/busca?q=${t}`,
 }
 
 /** A ordem importa: o primeiro padrão que casar vence. "Amazon Channel" vem

@@ -1,6 +1,7 @@
 import { Catalogo, type CatalogoParams } from '@/components/catalog/Catalogo'
 import { ProviderPanel } from '@/components/filters/ProviderPanel'
 import { GettingStarted } from '@/components/layout/GettingStarted'
+import { ehGratis } from '@/lib/catalog/gratis'
 import { FILMES } from '@/lib/catalog/media'
 import { getRegionProviders } from '@/lib/catalog/queries'
 import { getCurrentUser, getMarks } from '@/lib/marks/queries'
@@ -25,16 +26,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     selectedIds.includes(p.id),
   )
 
+  // Os 20 primeiros por prioridade cobrem os serviços que a maioria assina,
+  // mas os gratuitos ficam bem abaixo dessa linha — e são justamente os que
+  // interessam a quem não quer pagar nada. Entram à força, no fim da lista.
+  const doPainel = [
+    ...allProviders.slice(0, 20),
+    ...allProviders
+      .slice(20)
+      .filter((p) => ehGratis(p.id)),
+  ]
+
   return (
     <>
       {params.providers === 'open' && (
         <div className="wrap pb-10 pt-8">
           {/* getRegionProviders já devolve ordenado por prioridade no BR.
               São 86 no total; os 20 primeiros cobrem todos os relevantes. */}
-          <ProviderPanel
-            providers={allProviders.slice(0, 20)}
-            selectedIds={selectedIds}
-          />
+          <ProviderPanel providers={doPainel} selectedIds={selectedIds} />
         </div>
       )}
 

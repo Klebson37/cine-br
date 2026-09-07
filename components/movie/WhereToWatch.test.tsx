@@ -7,7 +7,7 @@ const netflix = { id: 8, name: 'Netflix', logoUrl: null }
 const appleTv = { id: 2, name: 'Apple TV', logoUrl: null }
 
 function availability(overrides: Partial<Availability> = {}): Availability {
-  return { flatrate: [], rent: [], buy: [], link: null, ...overrides }
+  return { flatrate: [], free: [], rent: [], buy: [], link: null, ...overrides }
 }
 
 describe('WhereToWatch', () => {
