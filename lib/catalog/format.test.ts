@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { describeSelection, formatRating, formatRuntime } from './format'
+import {
+  describeSelection,
+  formatRating,
+  formatRuntime,
+  initials,
+} from './format'
 
 describe('formatRating', () => {
   it('usa vírgula decimal', () => {
@@ -35,5 +40,28 @@ describe('describeSelection', () => {
     expect(describeSelection(0)).toMatch(/streamings do Brasil/)
     expect(describeSelection(1)).toMatch(/no streaming que você assina/)
     expect(describeSelection(4)).toMatch(/seus 4 streamings/)
+  })
+})
+
+describe('initials', () => {
+  it('usa a primeira e a última palavra do nome', () => {
+    expect(initials('Alfonso Herrera')).toBe('AH')
+  })
+
+  it('ignora os nomes do meio', () => {
+    expect(initials('Juan Pablo Cruz García')).toBe('JG')
+  })
+
+  it('devolve uma letra só para nome único', () => {
+    expect(initials('Cher')).toBe('C')
+  })
+
+  it('mantém acentos maiúsculos', () => {
+    expect(initials(' Álex Pera')).toBe('ÁP')
+  })
+
+  it('tolera espaços extras e string vazia', () => {
+    expect(initials('  Noé   Hernández  ')).toBe('NH')
+    expect(initials('')).toBe('')
   })
 })

@@ -22,6 +22,10 @@ export function MovieCard({ movie, availability, rank, action }: MovieCardProps)
 
   return (
     <div className="group relative">
+      {/* Acima do pôster, não sobre ele: em cima da arte o rótulo competia
+          com a imagem e escondia parte do cartaz. */}
+      {action && <div className="mb-1.5 flex justify-end">{action}</div>}
+
       <Link href={`/movie/${movie.id}`} className="block">
         {rank !== undefined && (
           // A posição é decorativa para quem lê a tela: a ordem dos cartões
@@ -63,7 +67,6 @@ export function MovieCard({ movie, availability, rank, action }: MovieCardProps)
           <p className="mt-0.5 text-xs text-nevoa">{movie.year}</p>
         )}
       </Link>
-      {action && <div className="absolute right-1.5 top-1.5 z-20">{action}</div>}
     </div>
   )
 }
