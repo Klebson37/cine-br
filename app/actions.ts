@@ -27,6 +27,10 @@ export async function saveProviders(formData: FormData): Promise<void> {
   })
 
   revalidatePath('/')
+  // Sai do painel depois de salvar: a URL carrega ?providers=open, e sem
+  // isto a pessoa salva e continua olhando o mesmo formulário, sem sinal
+  // de que deu certo.
+  redirect('/')
 }
 
 /**

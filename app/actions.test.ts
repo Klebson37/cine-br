@@ -16,6 +16,13 @@ vi.mock('@/lib/supabase/server', () => ({ createClient }))
 
 import { saveProviders, setMark, signOut } from './actions'
 
+/** saveProviders termina em redirect, que lanca por design no Next.
+ *  O dubla lanca 'REDIRECT:/' — engolir aqui deixa os testes falarem do
+ *  cookie, que e o que eles verificam. */
+async function salvar(form: FormData): Promise<void> {
+  await expect(saveProviders(form)).rejects.toThrow('REDIRECT:/')
+}
+
 describe('saveProviders', () => {
   beforeEach(() => vi.clearAllMocks())
 
@@ -24,7 +31,7 @@ describe('saveProviders', () => {
     form.append('providers', '8')
     form.append('providers', '119')
 
-    await saveProviders(form)
+    await salvar(form)
 
     expect(cookieStore.set).toHaveBeenCalledWith(
       'providers',
@@ -37,7 +44,7 @@ describe('saveProviders', () => {
     const form = new FormData()
     for (const id of ['1', '2', '3', '4', '5']) form.append('providers', id)
 
-    await saveProviders(form)
+    await salvar(form)
 
     expect(cookieStore.set).toHaveBeenCalledWith(
       'providers',
@@ -47,7 +54,7 @@ describe('saveProviders', () => {
   })
 
   it('grava vazio quando nada foi marcado', async () => {
-    await saveProviders(new FormData())
+    await salvar(new FormData())
     expect(cookieStore.set).toHaveBeenCalledWith(
       'providers',
       '',
@@ -55,8 +62,13 @@ describe('saveProviders', () => {
     )
   })
 
+  it('fecha o painel voltando para a home depois de salvar', async () => {
+    await salvar(new FormData())
+    expect(redirect).toHaveBeenCalledWith('/')
+  })
+
   it('revalida a home para a próxima renderização já sair certa', async () => {
-    await saveProviders(new FormData())
+    await salvar(new FormData())
     expect(revalidatePath).toHaveBeenCalledWith('/')
   })
 })
