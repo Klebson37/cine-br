@@ -18,7 +18,7 @@ const SORT_OPTIONS = [
 ]
 
 const FIELD =
-  'rounded-sm border border-borda bg-sala px-3 py-2 text-sm text-projecao'
+  'min-w-0 flex-1 basis-40 rounded-sm border border-borda bg-sala px-3 py-2 text-sm text-projecao sm:flex-none sm:basis-auto'
 
 const CHIP =
   'inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors'
@@ -93,39 +93,47 @@ export function FilterBar({
 
         <button
           type="submit"
-          className="rounded-sm border border-borda px-4 py-2 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
+          className="shrink-0 rounded-sm border border-borda px-4 py-2 text-sm font-medium text-projecao transition-colors hover:border-projecao/50"
         >
           Aplicar
         </button>
       </form>
 
-      {/* Links, não botões de formulário: um clique só, e sem JavaScript. */}
-      <nav aria-label="Filtrar por nota" className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs uppercase tracking-wider text-nevoa">
+      {/* Links, não botões de formulário: um clique só, e sem JavaScript.
+          O rótulo fica em linha própria no celular: em linha com as faixas
+          ele empurrava as cinco para uma quebra torta de três mais duas,
+          quando as cinco cabem folgadas numa fila só. */}
+      <nav
+        aria-label="Filtrar por nota"
+        className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
+      >
+        <span className="text-xs uppercase tracking-wider text-nevoa sm:mr-1">
           Filtrar por nota
         </span>
-        {faixas.map((faixa) => {
-          const ativa = faixa.value === activeRating
-          return (
-            <Link
-              key={faixa.label}
-              href={ratingHref(faixa.value, activeGenre, activeSort)}
-              aria-current={ativa ? 'page' : undefined}
-              className={`${CHIP} ${
-                ativa
-                  ? 'border-cortina bg-cortina/10 text-cortina'
-                  : 'border-borda text-nevoa hover:border-cortina/60 hover:text-projecao'
-              }`}
-            >
-              {faixa.value !== null && (
-                <span aria-hidden className="text-luz">
-                  ★
-                </span>
-              )}
-              {faixa.label}
-            </Link>
-          )
-        })}
+        <div className="flex flex-wrap gap-2">
+          {faixas.map((faixa) => {
+            const ativa = faixa.value === activeRating
+            return (
+              <Link
+                key={faixa.label}
+                href={ratingHref(faixa.value, activeGenre, activeSort)}
+                aria-current={ativa ? 'page' : undefined}
+                className={`${CHIP} ${
+                  ativa
+                    ? 'border-cortina bg-cortina/10 text-cortina'
+                    : 'border-borda text-nevoa hover:border-cortina/60 hover:text-projecao'
+                }`}
+              >
+                {faixa.value !== null && (
+                  <span aria-hidden className="text-luz">
+                    ★
+                  </span>
+                )}
+                {faixa.label}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
     </div>
   )

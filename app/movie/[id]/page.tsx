@@ -28,6 +28,14 @@ export default async function MoviePage({ params }: MoviePageProps) {
   ])
   if (!movie) notFound()
 
+  // Montado uma vez: o painel é o mesmo nos dois arranjos, com trailer e sem.
+  const ondeAssistir = (
+    <WhereToWatch
+      availability={movie.availability}
+      selectedIds={selectedIds}
+    />
+  )
+
   return (
     <article>
       {movie.backdropUrl && (
@@ -95,29 +103,36 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </div>
         </div>
 
-        {movie.overview && (
-          <p className="mt-8 max-w-[64ch] leading-relaxed text-projecao/85">
-            {movie.overview}
-          </p>
-        )}
+        {/* Pilha com gap, não margens por bloco: uma seção que não existe
+            — sem sinopse, sem trailer, sem elenco — não gera nó nenhum, e
+            portanto não deixa buraco. Margem em div externa deixaria. */}
+        <div className="mt-10 flex flex-col gap-12">
+          {movie.overview && (
+            <p className="max-w-[64ch] leading-relaxed text-projecao/85">
+              {movie.overview}
+            </p>
+          )}
 
-        {/* Onde assistir vem primeiro no HTML porque é a razão do app; no
-            desktop ele vai para a coluna da direita e fica visível junto
-            com o trailer. */}
-        <div className="mt-12 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_23rem]">
-          <div className="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
-            <WhereToWatch
-              availability={movie.availability}
-              selectedIds={selectedIds}
-            />
-          </div>
+          {movie.trailerYoutubeKey ? (
+            /* Onde assistir vem primeiro no HTML porque é a razão do app; no
+               desktop ele vai para a coluna da direita e fica visível junto
+               com o trailer. */
+            <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_23rem]">
+              <div className="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
+                {ondeAssistir}
+              </div>
 
-          <div className="lg:col-start-1 lg:row-start-1">
-            <Trailer youtubeKey={movie.trailerYoutubeKey} />
-          </div>
-        </div>
+              <div className="lg:col-start-1 lg:row-start-1">
+                <Trailer youtubeKey={movie.trailerYoutubeKey} />
+              </div>
+            </div>
+          ) : (
+            /* Sem trailer não existe coluna da esquerda para preencher. O
+               painel volta para a margem, na largura em que se lê, em vez de
+               ficar encolhido à direita de um vão da largura da página. */
+            <div className="max-w-[34rem]">{ondeAssistir}</div>
+          )}
 
-        <div className="mt-12">
           <CastList cast={movie.cast} />
         </div>
       </div>

@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { EmptyState } from '@/components/catalog/EmptyState'
 import { MovieCard } from '@/components/catalog/MovieCard'
+import { SearchField } from '@/components/layout/SearchField'
 import { getAvailability, searchMovies } from '@/lib/catalog/queries'
 import { classifyAvailability } from '@/lib/catalog/search-availability'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
@@ -9,16 +11,36 @@ interface SearchPageProps {
   searchParams: Promise<{ q?: string; only?: string }>
 }
 
+/** O campo de busca no celular.
+ *
+ *  O cabeçalho estreito mostra só a lupa, que traz para cá — então o campo
+ *  precisa existir na página, ou não haveria onde digitar. A partir de sm o
+ *  cabeçalho já tem o campo e este some, para não haver dois. */
+function BuscaNoCelular() {
+  return (
+    <form action="/search" role="search" className="mb-8 sm:hidden">
+      <Suspense
+        fallback={
+          <div className="h-9 w-full rounded-sm border border-projecao/15 bg-tinta/50" />
+        }
+      >
+        <SearchField />
+      </Suspense>
+    </form>
+  )
+}
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q, only } = await searchParams
   const query = q?.trim() ?? ''
 
   if (query === '') {
     return (
-      <div className="wrap pt-12">
+      <div className="wrap pt-10">
+        <BuscaNoCelular />
         <EmptyState
           title="Procure um filme pelo nome."
-          hint="Use o campo no topo da página. Os resultados mostram, um por um, se o filme já está incluído no que você assina."
+          hint="Os resultados mostram, um por um, se o filme já está incluído no que você assina."
           actionLabel="Voltar ao catálogo"
         />
       </div>
@@ -58,7 +80,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   ).length
 
   return (
-    <div className="wrap pt-12">
+    <div className="wrap pt-10">
+      <BuscaNoCelular />
+
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
         <div>
           <h1 className="panoramico max-w-[20ch] text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-tight text-projecao">

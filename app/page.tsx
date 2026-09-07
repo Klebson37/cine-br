@@ -58,7 +58,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <>
       {params.providers === 'open' && (
-        <div className="wrap pt-8">
+        <div className="wrap pb-10 pt-8">
           {/* getRegionProviders já devolve ordenado por prioridade no BR.
               São 86 no total; os 20 primeiros cobrem todos os relevantes. */}
           <ProviderPanel
@@ -72,7 +72,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           passo, e fazê-la já é o sinal de que a explicação cumpriu o papel.
           Não aparece com o painel aberto, para não empilhar duas caixas. */}
       {selectedIds.length === 0 && params.providers !== 'open' && (
-        <div className="wrap pt-8">
+        <div className="wrap pb-10 pt-8">
           <GettingStarted />
         </div>
       )}

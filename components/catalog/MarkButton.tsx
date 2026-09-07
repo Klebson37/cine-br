@@ -11,8 +11,17 @@ interface MarkButtonProps {
   variant?: 'card' | 'detail'
 }
 
+/** Altura fixa em vez de padding: no celular o botão saía com 26px, pequeno
+ *  demais para o dedo acertar sem mirar. Sobre o pôster ele fica compacto;
+ *  na página do filme é a ação principal e usa a mesma medida dos outros
+ *  botões do site. */
 const BASE =
-  'rounded-sm border px-2 py-1 text-xs transition-colors backdrop-blur-md'
+  'inline-flex items-center justify-center rounded-sm border transition-colors backdrop-blur-md'
+
+const MEDIDA = {
+  card: 'h-8 px-2.5 text-xs',
+  detail: 'h-10 px-4 text-sm font-medium',
+} as const
 
 const ACESO = 'border-luz/70 bg-tinta/70 text-luz'
 const APAGADO = 'border-projecao/25 bg-tinta/60 text-projecao/80 hover:border-luz/50'
@@ -66,7 +75,7 @@ export function MarkButton({
   if (variant === 'detail') {
     const botao = (state: MarkState) => {
       const ativo = current === state
-      const className = `${BASE} ${ativo ? ACESO : APAGADO}`
+      const className = `${BASE} ${MEDIDA.detail} ${ativo ? ACESO : APAGADO}`
       if (!signedIn) return convite(MARK_LABEL[state], className)
       return (
         <Form
@@ -91,7 +100,7 @@ export function MarkButton({
   }
 
   const texto = current === null ? MARK_LABEL.want : MARK_LABEL[current]
-  const className = `${BASE} ${current === null ? APAGADO : ACESO}`
+  const className = `${BASE} ${MEDIDA.card} ${current === null ? APAGADO : ACESO}`
 
   if (!signedIn) return convite(texto, className)
 

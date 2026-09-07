@@ -1,14 +1,12 @@
 import Link from 'next/link'
 import { signOut } from '@/app/actions'
 import type { CurrentUser } from '@/lib/marks/queries'
-
-const BOTAO =
-  'shrink-0 rounded-sm border border-projecao/20 bg-tinta/40 px-3 py-2 text-sm text-projecao backdrop-blur-md transition-colors hover:border-luz/60 hover:text-luz'
+import { BOTAO_CABECALHO } from './chrome'
 
 export function AuthButton({ user }: { user: CurrentUser | null }) {
   if (!user) {
     return (
-      <Link href="/auth/login" className={BOTAO}>
+      <Link href="/auth/login" className={BOTAO_CABECALHO}>
         Entrar
       </Link>
     )
@@ -26,7 +24,7 @@ export function AuthButton({ user }: { user: CurrentUser | null }) {
         </span>
       )}
       <form action={signOut}>
-        <button type="submit" className={BOTAO}>
+        <button type="submit" className={BOTAO_CABECALHO}>
           Sair
         </button>
       </form>

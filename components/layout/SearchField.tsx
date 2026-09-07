@@ -15,7 +15,7 @@ export function SearchField() {
       defaultValue={busca}
       placeholder="Buscar um filme"
       aria-label="Buscar um filme"
-      className="w-full rounded-sm border border-projecao/15 bg-tinta/50 px-3 py-2 text-sm text-projecao backdrop-blur-md placeholder:text-nevoa focus:border-projecao/30 focus:outline-none"
+      className="h-9 w-full rounded-sm border border-projecao/15 bg-tinta/50 px-3 text-sm text-projecao backdrop-blur-md placeholder:text-nevoa focus:border-projecao/30 focus:outline-none"
     />
   )
 }
