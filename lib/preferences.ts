@@ -1,5 +1,13 @@
-/** Teto de provedores simultâneos. Segura o número de requisições da home. */
-export const MAX_PROVIDERS = 4
+/** Teto de provedores simultâneos.
+ *
+ *  Cada serviço marcado vira uma fileira propria na home, e cada fileira e
+ *  uma consulta ao TMDB — o teto e o que segura esse numero. Com dez, a home
+ *  faz onze consultas por renderizacao fria, todas cacheadas por uma hora,
+ *  que o TMDB absorve com folga.
+ *
+ *  Quem assina muitos servicos era justamente quem mais perdia com o teto
+ *  antigo: marcava seis e via quatro. */
+export const MAX_PROVIDERS = 10
 export const PROVIDERS_COOKIE = 'providers'
 export const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365
 

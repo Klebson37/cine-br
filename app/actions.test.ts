@@ -14,6 +14,7 @@ vi.mock('next/cache', () => ({ revalidatePath }))
 vi.mock('next/navigation', () => ({ redirect }))
 vi.mock('@/lib/supabase/server', () => ({ createClient }))
 
+import { MAX_PROVIDERS } from '@/lib/preferences'
 import { saveProviders, setMark, signOut } from './actions'
 
 /** saveProviders termina em redirect, que lanca por design no Next.
@@ -40,15 +41,18 @@ describe('saveProviders', () => {
     )
   })
 
-  it('aplica o teto de quatro provedores', async () => {
+  it('aplica o teto de provedores', async () => {
     const form = new FormData()
-    for (const id of ['1', '2', '3', '4', '5']) form.append('providers', id)
+    for (let i = 1; i <= MAX_PROVIDERS + 2; i++) form.append('providers', String(i))
 
     await salvar(form)
 
+    const esperado = Array.from({ length: MAX_PROVIDERS }, (_, i) => i + 1).join(
+      ',',
+    )
     expect(cookieStore.set).toHaveBeenCalledWith(
       'providers',
-      '1,2,3,4',
+      esperado,
       expect.anything(),
     )
   })

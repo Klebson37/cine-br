@@ -31,8 +31,14 @@ describe('parseProviderCookie', () => {
   })
 
   it('corta no limite de provedores', () => {
-    expect(parseProviderCookie('1,2,3,4,5,6')).toEqual([1, 2, 3, 4])
-    expect(MAX_PROVIDERS).toBe(4)
+    expect(
+      parseProviderCookie('1,2,3,4,5,6,7,8,9,10,11,12'),
+    ).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    expect(MAX_PROVIDERS).toBe(10)
+  })
+
+  it('nao corta quem esta dentro do limite', () => {
+    expect(parseProviderCookie('1,2,3,4,5,6')).toEqual([1, 2, 3, 4, 5, 6])
   })
 
   it('sobrevive a lixo completo sem lançar', () => {
@@ -46,7 +52,9 @@ describe('serializeProviderCookie', () => {
   })
 
   it('aplica o limite ao gravar', () => {
-    expect(serializeProviderCookie([1, 2, 3, 4, 5])).toBe('1,2,3,4')
+    const excedentes = Array.from({ length: MAX_PROVIDERS + 2 }, (_, i) => i + 1)
+    const esperado = Array.from({ length: MAX_PROVIDERS }, (_, i) => i + 1)
+    expect(serializeProviderCookie(excedentes)).toBe(esperado.join(','))
   })
 
   it('grava string vazia para lista vazia', () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MAX_PROVIDERS } from '@/lib/preferences'
 import { buildRailSpecs } from './rails'
 import type { Provider } from './types'
 
@@ -36,15 +37,13 @@ describe('buildRailSpecs', () => {
     expect(rails[2].title).toBe('Na Amazon Prime Video')
   })
 
-  it('respeita o teto de quatro serviços, gerando no máximo cinco fileiras', () => {
-    const rails = buildRailSpecs([
-      provider(1, 'A'),
-      provider(2, 'B'),
-      provider(3, 'C'),
-      provider(4, 'D'),
-      provider(5, 'E'),
-    ])
-    expect(rails).toHaveLength(5)
+  it('respeita o teto de serviços, gerando no máximo uma fileira a mais', () => {
+    const excedentes = Array.from({ length: MAX_PROVIDERS + 3 }, (_, i) =>
+      provider(i + 1, `Serviço ${i + 1}`),
+    )
+    const rails = buildRailSpecs(excedentes)
+    // A de populares mais uma por serviço, e nenhuma pelos que passaram.
+    expect(rails).toHaveLength(MAX_PROVIDERS + 1)
   })
 
   it('gera chaves únicas', () => {
