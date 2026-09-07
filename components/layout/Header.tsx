@@ -26,7 +26,7 @@ export function Header({ selectedCount, user }: HeaderProps) {
         className="pointer-events-none absolute inset-x-0 top-0 -z-20 h-32 bg-gradient-to-b from-tinta/85 via-tinta/40 to-transparent"
       />
 
-      <div className="flex h-full items-center gap-2 px-[var(--margem)] sm:gap-6">
+      <div className="flex h-full items-center gap-1.5 px-[var(--margem)] sm:gap-4 lg:gap-6">
         <Marca />
 
         {/* No celular o campo inteiro não cabe ao lado da marca, dos
@@ -52,7 +52,7 @@ export function Header({ selectedCount, user }: HeaderProps) {
         <Link
           href="/search"
           aria-label="Buscar um filme"
-          className={`${BOTAO_CABECALHO} w-9 px-0 sm:hidden`}
+          className={`${BOTAO_CABECALHO} w-8 px-0 sm:hidden`}
         >
           <Lupa />
         </Link>
@@ -60,17 +60,34 @@ export function Header({ selectedCount, user }: HeaderProps) {
         <Link
           href="/?providers=open"
           aria-label={`Meus streamings (${selectedCount} escolhidos)`}
-          className={BOTAO_CABECALHO}
+          className={`${BOTAO_CABECALHO} px-2 sm:px-3.5`}
         >
           <Tela />
           <span className="hidden sm:inline">Meus streamings</span>
           {/* Dourado quando há serviços marcados: no site inteiro o dourado
               quer dizer "isso é seu". Zero não é conquista nenhuma. */}
           <span
-            className={`tabular-nums ${selectedCount > 0 ? 'text-luz' : 'text-nevoa'}`}
+            className={`hidden tabular-nums sm:inline ${
+              selectedCount > 0 ? 'text-luz' : 'text-nevoa'
+            }`}
           >
             ({selectedCount})
           </span>
+        </Link>
+
+        {/* Dourado, do lado dos streamings: no site inteiro o dourado quer
+            dizer "isso e seu", e nada e mais seu do que o que nao custa
+            nada. O brilho respira devagar para chamar o olho sem competir
+            com o vermelho do +18 ao lado. */}
+        <Link
+          href="/gratis"
+          aria-label="Filmes de graca, sem assinatura"
+          className="brilho-gratis inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-luz/60 bg-luz/15 px-2 text-sm font-semibold text-luz backdrop-blur-md transition-colors hover:border-luz hover:bg-luz/25 sm:px-3.5"
+        >
+          <span className="hidden sm:contents">
+            <Presente />
+          </span>
+          Grátis
         </Link>
 
         {/* Ao lado dos streamings, com cadeado: a porta e visivel antes de
@@ -80,15 +97,36 @@ export function Header({ selectedCount, user }: HeaderProps) {
         <Link
           href="/mais18"
           aria-label="Secao mais 18, conteudo classificado para adultos"
-          className="pulso-18 inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-cortina/50 bg-cortina/10 px-2.5 text-sm font-semibold text-cortina backdrop-blur-md transition-colors hover:border-cortina hover:bg-cortina/20 sm:px-3.5"
+          className="pulso-18 inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-cortina/50 bg-cortina/10 px-2 text-sm font-semibold text-cortina backdrop-blur-md transition-colors hover:border-cortina hover:bg-cortina/20 sm:px-3.5"
         >
-          <Cadeado />
+          <span className="hidden sm:contents">
+            <Cadeado />
+          </span>
           +18
         </Link>
 
         <AuthButton user={user} />
       </div>
     </header>
+  )
+}
+
+function Presente() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className="size-[0.95rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 11h17v9.5h-17z" />
+      <path d="M2 7.5h20V11H2zM12 7.5v13" />
+      <path d="M12 7.5S10.6 3 8.2 3a2.2 2.2 0 0 0 0 4.5zM12 7.5S13.4 3 15.8 3a2.2 2.2 0 0 1 0 4.5z" />
+    </svg>
   )
 }
 

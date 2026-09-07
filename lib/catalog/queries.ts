@@ -45,6 +45,9 @@ function comPoster(movies: Movie[]): Movie[] {
 
 export interface DiscoverOptions {
   providerIds?: number[]
+  /** Sobrepoe as monetizacoes aceitas. A secao Gratis pede so `free|ads`;
+   *  o resto do site aceita assinatura junto. */
+  monetization?: string
   /** Ids de palavra-chave do TMDB, separados por pipe (OU) ou vírgula (E).
    *  É o que descreve o teor de um filme, e não a faixa etária: "18 anos"
    *  cabe tanto em Deadpool quanto em Emmanuelle. */
@@ -66,12 +69,13 @@ export async function discoverMovies({
   minVoteAverage,
   minVoteCount,
   keywords,
+  monetization = MONETIZACAO_INCLUIDA,
 }: DiscoverOptions): Promise<Movie[]> {
   const data = await tmdbFetch<RawPaginated<RawMovie>>(
     '/discover/movie',
     {
       watch_region: WATCH_REGION,
-      with_watch_monetization_types: MONETIZACAO_INCLUIDA,
+      with_watch_monetization_types: monetization,
       with_keywords: keywords,
       // Pipe significa OU. Vírgula significaria E — filmes presentes em
       // todos os serviços ao mesmo tempo, que não é o que o usuário quer.

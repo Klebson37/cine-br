@@ -276,6 +276,24 @@ select option {
   animation: pulso-18 2600ms ease-in-out infinite;
 }
 
+/* O brilho do acesso ao Grátis. Mesma ideia do +18 e mesma razão para não
+   piscar, mas em dourado e fora de fase: dois halos vermelhos e dourados
+   respirando no mesmo compasso viram um pisca-pisca só. Os 900ms de atraso
+   fazem um acender enquanto o outro apaga. */
+@keyframes brilho-gratis {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-luz) 30%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 20px 3px color-mix(in srgb, var(--color-luz) 45%, transparent);
+  }
+}
+
+.brilho-gratis {
+  animation: brilho-gratis 2600ms ease-in-out 900ms infinite;
+}
+
 /* A única sequência não disparada pelo usuário: a abertura do herói. A arte
    assenta enquanto o texto sobe, em dois tempos. */
 @keyframes assenta {

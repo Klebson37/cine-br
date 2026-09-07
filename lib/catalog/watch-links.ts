@@ -55,6 +55,7 @@ const POR_ID: Record<number, Busca> = {
   538: (t) => `https://watch.plex.tv/search?q=${t}`,
   2077: (t) => `https://watch.plex.tv/search?q=${t}`,
   544: (t) => `https://libreflix.org/busca?q=${t}`,
+  559: (t) => `https://www.filmzie.com/search?q=${t}`,
 }
 
 /** A ordem importa: o primeiro padrão que casar vence. "Amazon Channel" vem

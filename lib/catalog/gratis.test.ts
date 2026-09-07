@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { MONETIZACAO_INCLUIDA, SERVICOS_GRATIS, ehGratis } from './gratis'
+import {
+  IDS_GRATIS,
+  MONETIZACAO_INCLUIDA,
+  MONETIZACAO_SEM_CUSTO,
+  SERVICOS_GRATIS,
+  SERVICOS_GRATIS_LISTA,
+  ehGratis,
+} from './gratis'
 
 describe('serviços grátis', () => {
   it('reconhece os que não cobram assinatura', () => {
@@ -35,5 +42,41 @@ describe('MONETIZACAO_INCLUIDA', () => {
 
   it('usa pipe, que é OU no TMDB — vírgula pediria todos ao mesmo tempo', () => {
     expect(MONETIZACAO_INCLUIDA).not.toContain(',')
+  })
+})
+
+describe('SERVICOS_GRATIS_LISTA', () => {
+  it('esta ordenada do maior acervo para o menor', () => {
+    const acervos = SERVICOS_GRATIS_LISTA.map((s) => s.acervo)
+    expect([...acervos].sort((a, b) => b - a)).toEqual(acervos)
+  })
+
+  it('nao repete servico', () => {
+    const ids = SERVICOS_GRATIS_LISTA.map((s) => s.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('nao lista o Plex Channel, que e o mesmo acervo do Plex', () => {
+    // 12.036 contra 11.926: a pagina mostraria a mesma prateleira duas vezes.
+    expect(SERVICOS_GRATIS_LISTA.some((s) => s.id === 2077)).toBe(false)
+    // Mas ele continua contando como gratuito no painel e no selo.
+    expect(ehGratis(2077)).toBe(true)
+  })
+
+  it('todo servico da lista conta como gratuito', () => {
+    for (const s of SERVICOS_GRATIS_LISTA) expect(ehGratis(s.id)).toBe(true)
+  })
+
+  it('IDS_GRATIS junta todos com pipe, que e OU no TMDB', () => {
+    const ids = IDS_GRATIS.split('|').map(Number)
+    expect(ids).toHaveLength(SERVICOS_GRATIS.size)
+    expect(IDS_GRATIS).not.toContain(',')
+  })
+})
+
+describe('MONETIZACAO_SEM_CUSTO', () => {
+  it('nao deixa assinatura entrar na secao Gratis', () => {
+    // Alguem abriria "Gratis" e encontraria um filme que precisa de Netflix.
+    expect(MONETIZACAO_SEM_CUSTO.split('|')).toEqual(['free', 'ads'])
   })
 })
