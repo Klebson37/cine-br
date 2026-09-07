@@ -238,6 +238,17 @@ body::after {
   border-radius: 999px;
 }
 
+/* O menu suspenso de um select é desenhado pelo sistema, fora da página, e
+   com fundo próprio — branco no Windows. Mas o texto de cada linha herda a
+   cor do campo, que aqui é o creme da projeção: creme sobre branco some, e
+   só a linha sob o cursor aparecia, porque essa o sistema pinta sozinho.
+   Dizer as duas cores no próprio option resolve; onde o navegador ignorar
+   a regra, ele cai no preto sobre branco dele, que também se lê. */
+select option {
+  background-color: var(--color-sala);
+  color: var(--color-projecao);
+}
+
 /* Foco visível em qualquer coisa navegável pelo teclado. */
 :where(a, button, input, select, [tabindex]):focus-visible {
   outline: 2px solid var(--color-luz);
