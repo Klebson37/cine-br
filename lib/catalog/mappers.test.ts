@@ -202,3 +202,45 @@ describe('toCast', () => {
     expect(toCast(undefined)).toEqual([])
   })
 })
+
+describe('toCast — retratos', () => {
+  function ator(id: number, order: number, foto: string | null) {
+    return {
+      id,
+      name: `Ator ${id}`,
+      character: `Personagem ${id}`,
+      profile_path: foto,
+      order,
+    }
+  }
+
+  it('põe quem tem foto antes de quem não tem', () => {
+    const cast = toCast({
+      cast: [ator(1, 0, null), ator(2, 1, '/b.jpg'), ator(3, 2, null)],
+    })
+    expect(cast.map((c) => c.id)).toEqual([2, 1, 3])
+  })
+
+  it('preserva a ordem de crédito dentro de cada grupo', () => {
+    const cast = toCast({
+      cast: [ator(3, 2, '/c.jpg'), ator(1, 0, '/a.jpg'), ator(2, 1, '/b.jpg')],
+    })
+    expect(cast.map((c) => c.id)).toEqual([1, 2, 3])
+  })
+
+  it('não esconde quem não tem foto: mostra o nome sem retrato', () => {
+    const cast = toCast({ cast: [ator(1, 0, null)] })
+    expect(cast).toHaveLength(1)
+    expect(cast[0].photoUrl).toBeNull()
+  })
+
+  it('enche as dez vagas com quem tem foto quando existe gente suficiente', () => {
+    const semFoto = Array.from({ length: 5 }, (_, i) => ator(i + 1, i, null))
+    const comFoto = Array.from({ length: 10 }, (_, i) =>
+      ator(i + 100, i + 5, `/f${i}.jpg`),
+    )
+    const cast = toCast({ cast: [...semFoto, ...comFoto] })
+    expect(cast).toHaveLength(10)
+    expect(cast.every((c) => c.photoUrl !== null)).toBe(true)
+  })
+})

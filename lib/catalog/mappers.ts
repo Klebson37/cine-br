@@ -56,10 +56,23 @@ export function toAvailability(raw: RawWatchProviders): Availability {
   }
 }
 
+/** O elenco principal, com quem tem retrato primeiro.
+ *
+ *  O TMDB não tem foto de boa parte dos atores — em "La Captura", quatro
+ *  dos dez primeiros vêm com profile_path nulo. Ordenar só por billing
+ *  deixava buracos no meio da fita. Aqui a ordem de crédito é preservada
+ *  dentro de cada grupo, mas quem tem foto ocupa as vagas antes: a fita
+ *  fica cheia, e quem entra continua sendo elenco principal.
+ *
+ *  Quem não tem foto ainda aparece, se sobrar vaga — com as iniciais no
+ *  lugar do retrato. É melhor mostrar o nome do que esconder o ator. */
 export function toCast(raw: RawCredits | undefined): CastMember[] {
   if (!raw?.cast) return []
-  return [...raw.cast]
-    .sort((a, b) => a.order - b.order)
+  const porCredito = [...raw.cast].sort((a, b) => a.order - b.order)
+  const comFoto = porCredito.filter((member) => member.profile_path !== null)
+  const semFoto = porCredito.filter((member) => member.profile_path === null)
+
+  return [...comFoto, ...semFoto]
     .slice(0, MAX_CAST)
     .map((member) => ({
       id: member.id,
