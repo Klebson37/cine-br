@@ -1,11 +1,13 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { MarkButton } from '@/components/catalog/MarkButton'
 import { MetaLine } from '@/components/catalog/MetaLine'
 import { CastList } from '@/components/movie/CastList'
 import { Trailer } from '@/components/movie/Trailer'
 import { WhereToWatch } from '@/components/movie/WhereToWatch'
 import { formatRating, formatRuntime } from '@/lib/catalog/format'
 import { getMovieDetail } from '@/lib/catalog/queries'
+import { getCurrentUser, getMarks } from '@/lib/marks/queries'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
 
 interface MoviePageProps {
@@ -17,9 +19,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
   const movieId = Number.parseInt(id, 10)
   if (!Number.isInteger(movieId) || movieId <= 0) notFound()
 
-  const [movie, selectedIds] = await Promise.all([
+  const [movie, selectedIds, marks, user] = await Promise.all([
     getMovieDetail(movieId),
     readSelectedProviderIds(),
+    getMarks(),
+    getCurrentUser(),
   ])
   if (!movie) notFound()
 
@@ -75,6 +79,14 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 formatRating(movie.rating),
               ]}
             />
+            <div className="mt-5">
+              <MarkButton
+                movieId={movie.id}
+                current={marks.get(movie.id) ?? null}
+                signedIn={user !== null}
+                variant="detail"
+              />
+            </div>
           </div>
         </div>
 

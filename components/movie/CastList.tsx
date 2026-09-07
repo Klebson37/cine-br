@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { initials } from '@/lib/catalog/format'
 import type { CastMember } from '@/lib/catalog/types'
 
 interface CastListProps {
@@ -18,7 +19,7 @@ export function CastList({ cast }: CastListProps) {
             {/* Retrato retangular, como os pôsteres: o mesmo objeto físico
                 em outra proporção, em vez de um avatar redondo. */}
             <div className="relative aspect-[3/4] overflow-hidden rounded-[2px] bg-sala ring-1 ring-inset ring-borda/70">
-              {member.photoUrl && (
+              {member.photoUrl ? (
                 <Image
                   src={member.photoUrl}
                   alt=""
@@ -26,6 +27,16 @@ export function CastList({ cast }: CastListProps) {
                   sizes="88px"
                   className="object-cover"
                 />
+              ) : (
+                // O TMDB não tem retrato de todo mundo. Um quadro vazio
+                // parece falha de carregamento; as iniciais mostram que a
+                // ausência é da fonte, não da tela.
+                <span
+                  aria-hidden
+                  className="absolute inset-0 flex items-center justify-center text-sm font-semibold tracking-wide text-nevoa"
+                >
+                  {initials(member.name)}
+                </span>
               )}
             </div>
             <p className="mt-2 text-xs font-medium leading-snug text-projecao/85">

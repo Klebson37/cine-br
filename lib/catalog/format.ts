@@ -22,3 +22,13 @@ export function describeSelection(count: number): string {
   if (count === 1) return 'Hoje, no streaming que você assina'
   return `Hoje, nos seus ${count} streamings`
 }
+
+/** Iniciais para o lugar do retrato quando o TMDB não tem foto do ator.
+ *  Duas letras no máximo: "Noé Hernández" vira "NH", "Cher" vira "C". */
+export function initials(name: string): string {
+  const partes = name.trim().split(/\s+/).filter(Boolean)
+  if (partes.length === 0) return ''
+  const primeira = partes[0][0]
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : ''
+  return (primeira + ultima).toUpperCase()
+}

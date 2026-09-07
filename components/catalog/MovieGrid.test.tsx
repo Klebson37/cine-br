@@ -1,47 +1,66 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/app/actions', () => ({ setMark: vi.fn() }))
+
 import type { Movie } from '@/lib/catalog/types'
 import { MovieGrid } from './MovieGrid'
 
-function movie(overrides: Partial<Movie> = {}): Movie {
+function filme(id: number): Movie {
   return {
-    id: 550,
-    title: 'Clube da Luta',
+    id,
+    title: `Filme ${id}`,
     year: 1999,
-    overview: '...',
-    posterUrl: 'https://image.tmdb.org/t/p/w500/p.jpg',
+    overview: '',
+    posterUrl: '/p.jpg',
     backdropUrl: null,
-    rating: 8.4,
+    rating: 8,
     runtimeMinutes: null,
-    ...overrides,
   }
 }
 
 describe('MovieGrid', () => {
-  it('lista os filmes recebidos', () => {
-    render(<MovieGrid movies={[movie(), movie({ id: 551, title: 'Seven' })]} />)
-    expect(screen.getByText('Clube da Luta')).toBeDefined()
-    expect(screen.getByText('Seven')).toBeDefined()
-  })
-
-  it('nunca fica em branco: mostra explicação e saída quando vazio', () => {
+  it('mostra o estado vazio quando nao ha filmes', () => {
     render(<MovieGrid movies={[]} />)
-    expect(screen.getByText(/nenhum filme/i)).toBeDefined()
-    expect(screen.getByRole('link', { name: /limpar filtros/i })).toBeDefined()
+    expect(screen.queryByRole('link', { name: /Filme/ })).toBeNull()
   })
 
-  it('mostra o ano quando existe', () => {
-    render(<MovieGrid movies={[movie()]} />)
-    expect(screen.getByText('1999')).toBeDefined()
+  it('renderiza um cartao por filme', () => {
+    render(<MovieGrid movies={[filme(1), filme(2)]} />)
+    expect(screen.getByText('Filme 1')).toBeDefined()
+    expect(screen.getByText('Filme 2')).toBeDefined()
   })
 
-  it('não quebra quando o filme não tem ano', () => {
-    render(<MovieGrid movies={[movie({ year: null })]} />)
-    expect(screen.getByText('Clube da Luta')).toBeDefined()
+  it('nao mostra botao de marcar sem o mapa de marcacoes', () => {
+    render(<MovieGrid movies={[filme(1)]} />)
+    expect(screen.queryByRole('button')).toBeNull()
   })
 
-  it('não quebra quando o filme não tem pôster', () => {
-    render(<MovieGrid movies={[movie({ posterUrl: null })]} />)
-    expect(screen.getByText('Clube da Luta')).toBeDefined()
+  it('mostra o botao de marcar quando recebe o mapa', () => {
+    render(
+      <MovieGrid movies={[filme(1)]} marks={new Map()} signedIn />,
+    )
+    expect(screen.getByRole('button', { name: /quero assistir/i })).toBeDefined()
+  })
+
+  it('reflete a marcacao existente de cada filme', () => {
+    render(
+      <MovieGrid
+        movies={[filme(1)]}
+        marks={new Map([[1, 'watched' as const]])}
+        signedIn
+      />,
+    )
+    expect(screen.getByRole('button', { name: /já assisti/i })).toBeDefined()
+  })
+
+  it('passa o selo de disponibilidade adiante', () => {
+    render(
+      <MovieGrid
+        movies={[filme(1)]}
+        availability={new Map([[1, 'subscription' as const]])}
+      />,
+    )
+    expect(screen.getByText('Na sua assinatura')).toBeDefined()
   })
 })

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Archivo } from 'next/font/google'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
+import { getCurrentUser } from '@/lib/marks/queries'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
 import './globals.css'
 
@@ -24,12 +25,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const selected = await readSelectedProviderIds()
+  const [selected, user] = await Promise.all([
+    readSelectedProviderIds(),
+    getCurrentUser(),
+  ])
 
   return (
     <html lang="pt-BR" className={archivo.variable}>
       <body className="min-h-screen bg-tinta text-projecao antialiased">
-        <Header selectedCount={selected.length} />
+        <Header selectedCount={selected.length} user={user} />
         <main className="pb-20">{children}</main>
         <Footer />
       </body>

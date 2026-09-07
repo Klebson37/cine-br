@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
+import type { CurrentUser } from '@/lib/marks/queries'
+import { AuthButton } from './AuthButton'
 import { SearchField } from './SearchField'
 
 interface HeaderProps {
   selectedCount: number
+  user: CurrentUser | null
 }
 
-export function Header({ selectedCount }: HeaderProps) {
+export function Header({ selectedCount, user }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 isolate h-[var(--cabecalho)]">
       {/* Fundo que só aparece com a rolagem, para a arte do herói ocupar o
@@ -56,6 +59,8 @@ export function Header({ selectedCount }: HeaderProps) {
           <span className="hidden sm:inline">Meus streamings </span>
           <span className="sm:hidden">Streamings </span>({selectedCount})
         </Link>
+
+        <AuthButton user={user} />
       </div>
     </header>
   )
