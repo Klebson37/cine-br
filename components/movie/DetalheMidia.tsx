@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { MetaLine } from '@/components/catalog/MetaLine'
 import { Nota } from '@/components/catalog/Nota'
 import { VoltarAoCatalogo } from '@/components/layout/VoltarAoCatalogo'
+import { BotaoAssistir } from '@/components/movie/BotaoAssistir'
 import { CastList } from '@/components/movie/CastList'
 import { Trailer } from '@/components/movie/Trailer'
 import { WhereToWatch } from '@/components/movie/WhereToWatch'
@@ -110,7 +111,17 @@ export function DetalheMidia({
                 ]}
               />
             </div>
-            {acao && <div className="mt-5">{acao}</div>}
+            {/* Assistir vem primeiro: e a razao de a pessoa ter aberto a
+                pagina. Marcar e o que ela faz quando decide NAO assistir
+                agora. Os tres na mesma linha, quebrando juntos no celular. */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <BotaoAssistir
+                availability={movie.availability}
+                title={movie.title}
+                selectedIds={selectedIds}
+              />
+              {acao}
+            </div>
           </div>
         </div>
 
