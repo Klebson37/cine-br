@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { MarkButton } from '@/components/catalog/MarkButton'
 import { MetaLine } from '@/components/catalog/MetaLine'
+import { VoltarAoCatalogo } from '@/components/layout/VoltarAoCatalogo'
 import { CastList } from '@/components/movie/CastList'
 import { Trailer } from '@/components/movie/Trailer'
 import { WhereToWatch } from '@/components/movie/WhereToWatch'
@@ -50,9 +51,13 @@ export default async function MoviePage({ params }: MoviePageProps) {
         </div>
       )}
 
+      {/* Com panorama a margem negativa cresce para abrir espaço ao link sem
+          mover o pôster do lugar onde ele já entrava na arte. */}
       <div
-        className={`wrap relative ${movie.backdropUrl ? '-mt-24' : 'pt-12'}`}
+        className={`wrap relative ${movie.backdropUrl ? '-mt-36' : 'pt-8'}`}
       >
+        <VoltarAoCatalogo className="mb-4" />
+
         <div className="flex flex-col gap-8 sm:flex-row sm:items-end">
           {/* O pôster sobe para dentro do panorama: a página começa no filme. */}
           <div className="relative aspect-[2/3] w-36 shrink-0 overflow-hidden rounded-[2px] bg-sala ring-1 ring-inset ring-borda sm:w-52">

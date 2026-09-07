@@ -41,7 +41,7 @@ export function RailStrip({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="group/fita relative">
+    <div className="relative">
       <div
         ref={fita}
         onScroll={medir}
@@ -65,24 +65,24 @@ function Seta({
 }) {
   const paraTras = direcao === -1
 
+  // A fita tem pt-3 e pb-7: o centro do pôster fica 0.875rem acima do centro
+  // da caixa, e é nele que o círculo se alinha.
   return (
     <button
       type="button"
       onClick={aoClicar}
       aria-label={paraTras ? 'Ver os filmes anteriores' : 'Ver mais filmes'}
-      className={`absolute bottom-10 top-3 z-20 hidden w-[var(--margem)] min-w-12 items-center justify-center text-projecao opacity-0 transition-opacity duration-200 focus-visible:opacity-100 group-hover/fita:opacity-100 md:flex ${
-        paraTras
-          ? 'left-0 bg-gradient-to-r from-tinta via-tinta/85 to-transparent'
-          : 'right-0 bg-gradient-to-l from-tinta via-tinta/85 to-transparent'
+      className={`absolute top-[calc(50%-0.875rem)] z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-cortina text-white shadow-lg shadow-tinta/70 transition-transform duration-200 hover:scale-110 focus-visible:scale-110 sm:size-11 ${
+        paraTras ? 'left-1 sm:left-2' : 'right-1 sm:right-2'
       }`}
     >
       <svg
         viewBox="0 0 24 24"
         aria-hidden
-        className="size-7"
+        className="size-6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
