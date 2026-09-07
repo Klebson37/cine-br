@@ -22,6 +22,7 @@ import {
   type MinRating,
 } from '@/lib/catalog/rating-filter'
 import type { Movie, Provider } from '@/lib/catalog/types'
+import { GettingStarted } from '@/components/layout/GettingStarted'
 import { ListTabs } from '@/components/layout/ListTabs'
 import { getCurrentUser, getMarks } from '@/lib/marks/queries'
 import type { MarkState } from '@/lib/marks/types'
@@ -64,6 +65,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             providers={allProviders.slice(0, 20)}
             selectedIds={selectedIds}
           />
+        </div>
+      )}
+
+      {/* Só para quem ainda não escolheu streamings: a escolha é o primeiro
+          passo, e fazê-la já é o sinal de que a explicação cumpriu o papel.
+          Não aparece com o painel aberto, para não empilhar duas caixas. */}
+      {selectedIds.length === 0 && params.providers !== 'open' && (
+        <div className="wrap pt-8">
+          <GettingStarted />
         </div>
       )}
 
