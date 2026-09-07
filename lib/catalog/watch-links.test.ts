@@ -47,3 +47,55 @@ describe('watchHref', () => {
     expect(watchHref(999999, 'Servico X', 'Matrix', null)).toBeNull()
   })
 })
+
+describe('watchHref — os tres niveis', () => {
+  it('o Plex usa query, nao q: com q ele responde 200 e ignora a busca', () => {
+    const url = watchHref(538, 'Plex', 'Metropolis', TMDB)
+    expect(url).toContain('query=Metropolis')
+    expect(url).not.toContain('?q=')
+  })
+
+  it('o Plex Channel vai para a mesma casa do Plex', () => {
+    expect(watchHref(2077, 'Plex Channel', 'Metropolis', TMDB)).toBe(
+      watchHref(538, 'Plex', 'Metropolis', TMDB),
+    )
+  })
+
+  it('servico sem busca por endereco vai para a propria casa, nao ao TMDB', () => {
+    // Era isto que mandava quem clicava em "Mercado Play" para o TMDB.
+    const url = watchHref(2302, 'Mercado Play', 'Homem-Aranha', TMDB)
+    expect(url).toContain('mercadolivre')
+    expect(url).not.toContain('themoviedb')
+  })
+
+  it('nenhum servico gratuito conhecido cai no TMDB', () => {
+    const gratuitos: [number, string][] = [
+      [300, 'Pluto TV'],
+      [2302, 'Mercado Play'],
+      [538, 'Plex'],
+      [2077, 'Plex Channel'],
+      [19, 'NetMovies'],
+      [559, 'Filmzie'],
+      [2623, 'Artiflix'],
+      [692, 'Cultpix'],
+      [2478, 'FOUND TV'],
+      [544, 'Libreflix'],
+      [2285, 'JustWatch TV'],
+    ]
+    for (const [id, nome] of gratuitos) {
+      const url = watchHref(id, nome, 'Metropolis', TMDB)
+      expect(url, nome).not.toBe(TMDB)
+      expect(url, nome).not.toContain('themoviedb.org')
+    }
+  })
+
+  it('a busca vence a casa quando o servico tem as duas', () => {
+    // O Plex esta so na busca; o Disney+ so na casa. Nenhum nos dois.
+    expect(watchHref(538, 'Plex', 'X', TMDB)).toContain('watch.plex.tv')
+    expect(watchHref(337, 'Disney Plus', 'X', TMDB)).toContain('disneyplus.com')
+  })
+
+  it('o TMDB sobra so para quem nao esta em mapa nenhum', () => {
+    expect(watchHref(999999, 'Serviço Novo', 'X', TMDB)).toBe(TMDB)
+  })
+})

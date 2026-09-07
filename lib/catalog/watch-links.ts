@@ -1,61 +1,73 @@
-/** Para onde vai quem clica num serviço em "Onde assistir".
+/** Para onde vai quem clica num serviço em "Onde assistir" ou no botão
+ *  Assistir.
  *
- *  O TMDB não entrega link direto por serviço. O que ele dá é um endereço
- *  por título — uma página dele mesmo, listando as opções daquele país. Útil
- *  como rede de segurança, mas mandar a pessoa para outro catálogo quando
- *  ela quer assistir é um passo a mais no caminho errado.
+ *  Nenhuma API pública entrega o endereço do filme dentro de cada serviço:
+ *  isso exigiria o id interno que cada um usa, e o TMDB não o tem. O mais
+ *  perto que dá é a busca do próprio serviço, já com o título digitado.
  *
- *  Então cada serviço grande do Brasil tem aqui o endereço de busca dele.
- *  Tocar em "Netflix" abre a Netflix já procurando o título — no celular, o
- *  próprio aplicativo, porque esses endereços são links universais. Não é o
- *  play direto, que exigiria licença de distribuição do detentor dos
- *  direitos, mas é um toque até o filme dentro do serviço que a pessoa paga.
+ *  Daí os três níveis, do melhor para o pior:
  *
- *  São duas camadas de propósito. O id é exato, mas o TMDB tem dezenas de
- *  "canais" que são vitrines dentro de outro serviço — HBO Max Amazon
- *  Channel, Telecine Amazon Channel, Paramount+ Amazon Channel — e catalogar
- *  o id de cada um envelheceria a cada canal novo. O nome resolve a família
- *  inteira de uma vez. Quem escapar das duas cai na página do TMDB, que
- *  lista todas as opções: pior que o ideal, melhor que um selo morto. */
+ *  1. BUSCA — endereço que aplica mesmo a consulta. Cada um foi aberto num
+ *     navegador de verdade e conferido: o título procurado tem de aparecer
+ *     na página. Só entra aqui o que passou nesse teste.
+ *  2. CASA — a porta do serviço, quando a busca dele não aceita consulta por
+ *     endereço. Não abre o filme, mas abre o lugar certo, e a pessoa digita
+ *     uma vez. É muito melhor que despachá-la para um catálogo de terceiros.
+ *  3. A página do título no TMDB, só para serviço que não conheço.
+ *
+ *  Código HTTP 200 não serve de prova aqui: quase todos são aplicações de
+ *  página única e devolvem 200 para qualquer rota, inclusive inventada. Foi
+ *  assim que o Plex entrou no ar com `?q=` — respondia 200 e ignorava a
+ *  busca. O parâmetro certo é `query`, e o Plex é o maior acervo gratuito
+ *  do catálogo, com doze mil filmes. */
 
 type Busca = (tituloCodificado: string) => string
 
 const PRIME: Busca = (t) => `https://www.primevideo.com/search?phrase=${t}`
 const APPLE: Busca = (t) => `https://tv.apple.com/search?term=${t}`
 const MAX: Busca = (t) => `https://play.max.com/search?q=${t}`
+const PLEX: Busca = (t) => `https://watch.plex.tv/search?query=${t}`
 
-/** Ids conferidos contra /watch/providers/movie?watch_region=BR, e cada
- *  endereço testado com uma requisição de verdade: só entra aqui o que
- *  respondeu 200 com um termo de busca.
- *
- *  Disney+ e NetMovies ficaram de fora por isso — as duas exigem sessão e
- *  devolvem 404 para qualquer caminho de busca aberto. Elas caem na página
- *  do título no TMDB, que existe e leva adiante; inventar um endereço que
- *  parece certo e dá erro seria pior que o desvio. */
-const POR_ID: Record<number, Busca> = {
+/** Nível 1: a consulta chega na página. Conferido em navegador. */
+const BUSCA_POR_ID: Record<number, Busca> = {
   8: (t) => `https://www.netflix.com/search?q=${t}`,
   119: PRIME,
   350: APPLE,
+  2: APPLE,
+  1899: MAX,
+  538: PLEX,
+  2077: PLEX,
   2285: (t) => `https://www.justwatch.com/br/busca?q=${t}`,
   167: (t) => `https://www.clarotvmais.com.br/busca?q=${t}`,
   484: (t) => `https://www.clarotvmais.com.br/busca?q=${t}`,
   47: (t) => `https://www.looke.com.br/busca?q=${t}`,
   531: (t) => `https://www.paramountplus.com/br/search/?q=${t}`,
-  1899: MAX,
-  2: APPLE,
   307: (t) => `https://globoplay.globo.com/busca/?q=${t}`,
   283: (t) => `https://www.crunchyroll.com/pt-br/search?q=${t}`,
   11: (t) => `https://mubi.com/pt/br/search/films?query=${t}`,
   10: (t) => `https://www.amazon.com.br/s?k=${t}&i=instant-video`,
   3: (t) => `https://play.google.com/store/search?q=${t}&c=movies`,
-  // Os que não cobram assinatura. São o motivo de o painel ter passado a
-  // listá-los: sem endereço próprio, o botão "de graça" mandaria a pessoa
-  // para outro catálogo em vez de para o filme.
-  300: (t) => `https://pluto.tv/br/search?q=${t}`,
-  538: (t) => `https://watch.plex.tv/search?q=${t}`,
-  2077: (t) => `https://watch.plex.tv/search?q=${t}`,
-  544: (t) => `https://libreflix.org/busca?q=${t}`,
-  559: (t) => `https://www.filmzie.com/search?q=${t}`,
+}
+
+/** Nível 2: a porta do serviço.
+ *
+ *  Estes ou não aceitam consulta por endereço, ou aceitam e ignoram — o
+ *  Pluto TV carrega a página de busca e deixa a caixa vazia; o Filmzie e o
+ *  FOUND TV devolvem a home sob qualquer parâmetro; o Mercado Play barra
+ *  robô e não dá para conferir de fora. Levar a pessoa até a casa certa e
+ *  deixá-la digitar é honesto; prometer a busca e entregar outra coisa,
+ *  não. */
+const CASA_POR_ID: Record<number, string> = {
+  300: 'https://pluto.tv/br/search',
+  2302: 'https://play.mercadolivre.com.br',
+  19: 'https://www.netmovies.com.br',
+  559: 'https://www.filmzie.com',
+  2623: 'https://www.artiflix.com',
+  692: 'https://www.cultpix.com',
+  2478: 'https://foundtv.com',
+  544: 'https://libreflix.org',
+  // Disney+ exige sessão e devolve 404 em todo caminho de busca aberto.
+  337: 'https://www.disneyplus.com/pt-br',
 }
 
 /** A ordem importa: o primeiro padrão que casar vence. "Amazon Channel" vem
@@ -67,15 +79,16 @@ const POR_NOME: [RegExp, Busca][] = [
   [/prime video|^amazon video/i, PRIME],
   [/apple tv/i, APPLE],
   [/hbo|^max$/i, MAX],
+  [/^plex/i, PLEX],
 ]
 
 /**
  * O endereço para onde o selo de um serviço leva.
  *
  * `reserva` é o link do próprio título no TMDB, que a API devolve junto da
- * disponibilidade. Vale para os serviços fora das duas camadas e para quando
- * o TMDB não manda nada — aí não há para onde ir, e o selo continua sendo só
- * um selo, em vez de virar um link quebrado.
+ * disponibilidade. É o último recurso, e existe só para serviço que não está
+ * em nenhum dos dois mapas. Sem ele e sem correspondência, devolve null — e
+ * aí o selo continua sendo selo, em vez de virar um link quebrado.
  */
 export function watchHref(
   providerId: number,
@@ -85,12 +98,15 @@ export function watchHref(
 ): string | null {
   const codificado = encodeURIComponent(titulo)
 
-  const porId = POR_ID[providerId]
-  if (porId) return porId(codificado)
+  const busca = BUSCA_POR_ID[providerId]
+  if (busca) return busca(codificado)
 
-  for (const [padrao, busca] of POR_NOME) {
-    if (padrao.test(providerName)) return busca(codificado)
+  for (const [padrao, porNome] of POR_NOME) {
+    if (padrao.test(providerName)) return porNome(codificado)
   }
+
+  const casa = CASA_POR_ID[providerId]
+  if (casa) return casa
 
   return reserva
 }
