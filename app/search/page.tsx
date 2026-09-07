@@ -62,6 +62,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           flatrate: [],
           rent: [],
           buy: [],
+          link: null,
         })),
         selectedIds,
       ),

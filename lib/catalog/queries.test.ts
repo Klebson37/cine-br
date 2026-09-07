@@ -137,7 +137,7 @@ describe('getMovieDetail', () => {
 
     const detail = await getMovieDetail(550)
 
-    expect(detail?.availability).toEqual({ flatrate: [], rent: [], buy: [] })
+    expect(detail?.availability).toEqual({ flatrate: [], rent: [], buy: [], link: null })
   })
 })
 

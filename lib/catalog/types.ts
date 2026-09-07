@@ -22,6 +22,10 @@ export interface Availability {
   flatrate: Provider[]
   rent: Provider[]
   buy: Provider[]
+  /** Pagina do proprio TMDB com as opcoes daquele titulo no pais. Vinha na
+   *  resposta e era descartada; e a reserva de quem clica num servico que
+   *  nao esta no mapa de buscas. */
+  link: string | null
 }
 
 export interface CastMember {

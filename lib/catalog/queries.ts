@@ -164,7 +164,7 @@ export async function getMovieDetail(id: number): Promise<MovieDetail | null> {
     ...toMovie(raw),
     availability: rawProviders
       ? toAvailability(rawProviders)
-      : { flatrate: [], rent: [], buy: [] },
+      : { flatrate: [], rent: [], buy: [], link: null },
     trailerYoutubeKey: pickTrailerKey(raw.videos),
     cast: toCast(raw.credits),
   }
@@ -245,7 +245,7 @@ export async function getSeriesDetail(id: number): Promise<MovieDetail | null> {
     ...toSeries(raw),
     availability: rawProviders
       ? toAvailability(rawProviders)
-      : { flatrate: [], rent: [], buy: [] },
+      : { flatrate: [], rent: [], buy: [], link: null },
     trailerYoutubeKey: pickTrailerKey(raw.videos),
     cast: toCast(raw.credits),
   }

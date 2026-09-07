@@ -76,6 +76,7 @@ export function toAvailability(raw: RawWatchProviders): Availability {
     flatrate: (region?.flatrate ?? []).map(toProvider),
     rent: (region?.rent ?? []).map(toProvider),
     buy: (region?.buy ?? []).map(toProvider),
+    link: region?.link ?? null,
   }
 }
 

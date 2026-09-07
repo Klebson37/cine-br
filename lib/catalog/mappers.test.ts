@@ -118,7 +118,7 @@ describe('toAvailability', () => {
 
   it('devolve listas vazias quando não existe a chave BR', () => {
     const semBr: RawWatchProviders = { results: { US: { flatrate: [] } } }
-    expect(toAvailability(semBr)).toEqual({ flatrate: [], rent: [], buy: [] })
+    expect(toAvailability(semBr)).toEqual({ flatrate: [], rent: [], buy: [], link: null })
   })
 
   it('devolve listas vazias quando results vem vazio', () => {
@@ -126,6 +126,7 @@ describe('toAvailability', () => {
       flatrate: [],
       rent: [],
       buy: [],
+      link: null,
     })
   })
 })

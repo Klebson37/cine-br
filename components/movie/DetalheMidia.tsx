@@ -34,7 +34,11 @@ export function DetalheMidia({
 }: DetalheMidiaProps) {
   // Montado uma vez: o painel é o mesmo nos dois arranjos, com trailer e sem.
   const ondeAssistir = (
-    <WhereToWatch availability={movie.availability} selectedIds={selectedIds} />
+    <WhereToWatch
+      availability={movie.availability}
+      selectedIds={selectedIds}
+      title={movie.title}
+    />
   )
 
   const duracao = formatRuntime(movie.runtimeMinutes)

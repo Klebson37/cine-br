@@ -7,7 +7,7 @@ const max = { id: 384, name: 'Max', logoUrl: null }
 const appleTv = { id: 2, name: 'Apple TV', logoUrl: null }
 
 function availability(overrides: Partial<Availability> = {}): Availability {
-  return { flatrate: [], rent: [], buy: [], ...overrides }
+  return { flatrate: [], rent: [], buy: [], link: null, ...overrides }
 }
 
 describe('classifyAvailability', () => {

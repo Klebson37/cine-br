@@ -7,7 +7,7 @@ const netflix = { id: 8, name: 'Netflix', logoUrl: null }
 const appleTv = { id: 2, name: 'Apple TV', logoUrl: null }
 
 function availability(overrides: Partial<Availability> = {}): Availability {
-  return { flatrate: [], rent: [], buy: [], ...overrides }
+  return { flatrate: [], rent: [], buy: [], link: null, ...overrides }
 }
 
 describe('WhereToWatch', () => {
@@ -66,5 +66,66 @@ describe('WhereToWatch com os serviços do usuário', () => {
     expect(
       screen.getByText(/em assinaturas que você não tem/i),
     ).toBeDefined()
+  })
+})
+
+describe('WhereToWatch — o caminho ate o filme', () => {
+  it('o servico vira link que abre a busca dele com o titulo', () => {
+    render(
+      <WhereToWatch
+        availability={availability({ flatrate: [netflix] })}
+        title="O Império da Paixão"
+      />,
+    )
+    const link = screen.getByRole('link', { name: /assistir em netflix/i })
+    expect(link.getAttribute('href')).toContain('netflix.com/search')
+    expect(link.getAttribute('href')).toContain('Imp')
+  })
+
+  it('abre em outra aba, sem entregar a janela ao destino', () => {
+    render(
+      <WhereToWatch
+        availability={availability({ flatrate: [netflix] })}
+        title="Matrix"
+      />,
+    )
+    const link = screen.getByRole('link', { name: /assistir em netflix/i })
+    expect(link.getAttribute('target')).toBe('_blank')
+    expect(link.getAttribute('rel')).toContain('noopener')
+  })
+
+  it('servico fora do mapa cai na pagina do titulo no TMDB', () => {
+    const desconhecido = { id: 999999, name: 'Serviço X', logoUrl: null }
+    render(
+      <WhereToWatch
+        availability={availability({
+          flatrate: [desconhecido],
+          link: 'https://www.themoviedb.org/movie/1/watch?locale=BR',
+        })}
+        title="Matrix"
+      />,
+    )
+    expect(
+      screen
+        .getByRole('link', { name: /assistir em serviço x/i })
+        .getAttribute('href'),
+    ).toContain('themoviedb.org')
+  })
+
+  it('sem titulo o selo continua selo, e nao vira link quebrado', () => {
+    render(<WhereToWatch availability={availability({ flatrate: [netflix] })} />)
+    expect(screen.queryByRole('link')).toBeNull()
+    expect(screen.getByText('Netflix')).toBeDefined()
+  })
+
+  it('sem mapa e sem reserva, tambem nao inventa link', () => {
+    const desconhecido = { id: 999999, name: 'Serviço X', logoUrl: null }
+    render(
+      <WhereToWatch
+        availability={availability({ flatrate: [desconhecido] })}
+        title="Matrix"
+      />,
+    )
+    expect(screen.queryByRole('link')).toBeNull()
   })
 })
