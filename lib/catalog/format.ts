@@ -32,3 +32,10 @@ export function initials(name: string): string {
   const ultima = partes.length > 1 ? partes[partes.length - 1][0] : ''
   return (primeira + ultima).toUpperCase()
 }
+
+/** Nota compacta para o selo sobre o pôster: "8,4" em vez de "8,4 de 10".
+ *  No cartaz o contexto já é o filme, e a estrela ao lado diz que é nota. */
+export function formatRatingShort(rating: number | null): string | null {
+  if (rating === null) return null
+  return rating.toFixed(1).replace('.', ',')
+}

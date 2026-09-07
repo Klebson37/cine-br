@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { formatRatingShort } from '@/lib/catalog/format'
 import type { AvailabilityLabel } from '@/lib/catalog/search-availability'
 import type { Movie } from '@/lib/catalog/types'
 import { AvailabilityBadge } from './AvailabilityBadge'
@@ -19,6 +20,8 @@ interface MovieCardProps {
 
 export function MovieCard({ movie, availability, rank, action }: MovieCardProps) {
   const recuado = availability === 'paid' || availability === 'unavailable'
+  // Nota do TMDB. Filme nunca votado não tem selo — zero seria mentira.
+  const nota = formatRatingShort(movie.rating)
 
   return (
     <div className="group relative">
@@ -54,6 +57,16 @@ export function MovieCard({ movie, availability, rank, action }: MovieCardProps)
           ) : (
             <span className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs leading-snug text-nevoa">
               Sem pôster
+            </span>
+          )}
+
+          {nota && (
+            <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-[0.15rem] rounded-full border border-luz/30 bg-tinta/80 px-1.5 py-[0.1rem] text-[0.6875rem] font-semibold tabular-nums backdrop-blur-[2px]">
+              <span aria-hidden className="text-luz">
+                ★
+              </span>
+              <span className="sr-only">Nota</span>
+              {nota}
             </span>
           )}
         </div>

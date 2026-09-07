@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   describeSelection,
   formatRating,
+  formatRatingShort,
   formatRuntime,
   initials,
 } from './format'
@@ -63,5 +64,19 @@ describe('initials', () => {
   it('tolera espaços extras e string vazia', () => {
     expect(initials('  Noé   Hernández  ')).toBe('NH')
     expect(initials('')).toBe('')
+  })
+})
+
+describe('formatRatingShort', () => {
+  it('usa vírgula decimal, sem o "de 10"', () => {
+    expect(formatRatingShort(8.4)).toBe('8,4')
+  })
+
+  it('mantém uma casa mesmo em nota redonda', () => {
+    expect(formatRatingShort(9)).toBe('9,0')
+  })
+
+  it('devolve null quando não há nota', () => {
+    expect(formatRatingShort(null)).toBeNull()
   })
 })

@@ -8,6 +8,10 @@
   --color-nevoa: #a79cbf;
   --color-luz: #ffc24b;
   --color-cobranca: #e0776b;
+  /* Vermelho de cortina de cinema, no tom exato da Netflix. Marca o que
+     chama atencao — regua de secao e filtro ativo — sem tomar o lugar do
+     dourado, que significa "incluido na sua assinatura". */
+  --color-cortina: #e50914;
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 }
@@ -78,6 +82,19 @@ body::after {
   font-stretch: 112%;
   font-weight: 600;
   letter-spacing: -0.005em;
+}
+
+/* Regua vertical antes do titulo da fileira: separa as secoes sem gastar
+   uma linha inteira de espaco. */
+.titulo-secao::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 1.05em;
+  margin-right: 0.6rem;
+  border-radius: 1px;
+  background: var(--color-cortina);
+  vertical-align: -0.12em;
 }
 
 /* Numeral do ranking: contorno vazado para marcar a posição sobre o
