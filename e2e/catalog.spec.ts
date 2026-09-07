@@ -23,3 +23,30 @@ test('percorre o fluxo principal do catálogo', async ({ page }) => {
     page.getByRole('heading', { name: /onde assistir/i }),
   ).toBeVisible()
 })
+
+test('filtra a home por nota minima sem sair do modo descoberta', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  const antes = await page
+    .getByRole('heading', { level: 2 })
+    .first()
+    .textContent()
+  expect(antes).toContain('10')
+
+  await page.getByLabel('Nota mínima').selectOption('8')
+  await page.getByRole('button', { name: /aplicar/i }).click()
+
+  await expect(page).toHaveURL(/rating=8/)
+
+  // Continua em descoberta: as fileiras seguem na tela, e o título da
+  // fileira de ranking perde a promessa de dez.
+  const depois = page.getByRole('heading', { level: 2 }).first()
+  await expect(depois).toBeVisible()
+  await expect(depois).toContainText(/mais populares/i)
+  await expect(depois).not.toContainText('10')
+
+  // O seletor lembra a escolha depois do recarregamento.
+  await expect(page.getByLabel('Nota mínima')).toHaveValue('8')
+})

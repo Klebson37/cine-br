@@ -11,6 +11,16 @@ import {
   getGenres,
   getRegionProviders,
 } from '@/lib/catalog/queries'
+import {
+  applyRatingToList,
+  applyRatingToRails,
+} from '@/lib/catalog/rated-discovery'
+import {
+  MIN_VOTE_COUNT,
+  parseMinRating,
+  prefilterVoteAverage,
+  type MinRating,
+} from '@/lib/catalog/rating-filter'
 import type { Movie, Provider } from '@/lib/catalog/types'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
 
@@ -18,6 +28,7 @@ interface HomePageProps {
   searchParams: Promise<{
     genre?: string
     sort?: string
+    rating?: string
     providers?: string
   }>
 }
@@ -25,6 +36,8 @@ interface HomePageProps {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams
   const mode = resolveHomeMode(params)
+  // Convertida uma vez, aqui: daqui para baixo ninguém mais vê string.
+  const minRating = parseMinRating(params.rating)
 
   const [selectedIds, allProviders, genres] = await Promise.all([
     readSelectedProviderIds(),
@@ -54,6 +67,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           selectedProviders={selectedProviders}
           selectedCount={selectedIds.length}
           genres={genres}
+          minRating={minRating}
         />
       ) : (
         <FilteredMode
@@ -61,6 +75,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           genres={genres}
           genre={params.genre}
           sort={params.sort}
+          minRating={minRating}
         />
       )}
     </>
@@ -89,25 +104,34 @@ async function DiscoveryMode({
   selectedProviders,
   selectedCount,
   genres,
+  minRating,
 }: {
   selectedProviders: Provider[]
   selectedCount: number
   genres: Awaited<ReturnType<typeof getGenres>>
+  minRating: MinRating | null
 }) {
-  const specs = buildRailSpecs(selectedProviders)
+  const specs = buildRailSpecs(selectedProviders, minRating !== null)
   const byId = new Map(selectedProviders.map((p) => [p.id, p]))
 
   // Buscadas em paralelo. Uma fileira que falha vira lista vazia e some,
   // em vez de derrubar a home inteira.
   const results = await Promise.all(
     specs.map((spec) =>
-      discoverMovies({ providerIds: spec.providerIds }).catch(
-        () => [] as Movie[],
-      ),
+      discoverMovies({
+        providerIds: spec.providerIds,
+        minVoteAverage:
+          minRating === null ? undefined : prefilterVoteAverage(minRating),
+        minVoteCount: minRating === null ? undefined : MIN_VOTE_COUNT,
+      }).catch(() => [] as Movie[]),
     ),
   )
 
-  const featured = results[0]?.[0]
+  // Uma rodada de consultas ao IMDb para o conjunto todo, deduplicado.
+  const filtrados =
+    minRating === null ? results : await applyRatingToRails(results, minRating)
+
+  const featured = filtrados[0]?.[0]
   const included = await resolveIncluded(
     featured,
     selectedProviders.map((p) => p.id),
@@ -117,9 +141,10 @@ async function DiscoveryMode({
     spec,
     // A primeira fileira é uma classificação: mostra os dez primeiros na
     // ordem exata, sem tirar o destaque do topo — tirar deslocaria todas as
-    // posições e a numeração passaria a mentir.
+    // posições e a numeração passaria a mentir. O corte vem DEPOIS do filtro
+    // de nota: cortar antes entregaria três filmes sob um título de dez.
     movies:
-      index === 0 ? results[0].slice(0, TAMANHO_RANKING) : results[index],
+      index === 0 ? filtrados[0].slice(0, TAMANHO_RANKING) : filtrados[index],
     ranked: index === 0,
     // Só as fileiras de um serviço só carregam a marca no título.
     provider:
@@ -135,7 +160,7 @@ async function DiscoveryMode({
       />
 
       <div className="wrap mt-6">
-        <FilterBar genres={genres} />
+        <FilterBar genres={genres} activeRating={minRating} />
       </div>
 
       <div className="palco">
@@ -158,21 +183,36 @@ async function FilteredMode({
   genres,
   genre,
   sort,
+  minRating,
 }: {
   providerIds: number[]
   genres: Awaited<ReturnType<typeof getGenres>>
   genre?: string
   sort?: string
+  minRating: MinRating | null
 }) {
-  const movies = await discoverMovies({
+  const encontrados = await discoverMovies({
     providerIds,
     genreId: genre ? Number.parseInt(genre, 10) : undefined,
     sortBy: sort || undefined,
+    minVoteAverage:
+      minRating === null ? undefined : prefilterVoteAverage(minRating),
+    minVoteCount: minRating === null ? undefined : MIN_VOTE_COUNT,
   })
+
+  const movies =
+    minRating === null
+      ? encontrados
+      : await applyRatingToList(encontrados, minRating)
 
   return (
     <div className="wrap pt-10">
-      <FilterBar genres={genres} activeGenre={genre} activeSort={sort} />
+      <FilterBar
+        genres={genres}
+        activeGenre={genre}
+        activeSort={sort}
+        activeRating={minRating}
+      />
       <div className="mt-10">
         <MovieGrid movies={movies} />
       </div>
