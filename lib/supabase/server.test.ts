@@ -1,10 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+type OpcoesClienteServidor = {
+  cookies: {
+    getAll: () => { name: string; value: string }[]
+    setAll: (
+      paraGravar: Array<{
+        name: string
+        value: string
+        options: Record<string, unknown>
+      }>,
+    ) => void
+  }
+}
+
 const cookieStore = vi.hoisted(() => ({
   getAll: vi.fn(() => [{ name: 'sb-token', value: 'abc' }]),
   set: vi.fn(),
 }))
-const createServerClient = vi.hoisted(() => vi.fn(() => ({ marcador: true })))
+const createServerClient = vi.hoisted(() =>
+  vi.fn<(url: string, chave: string, opcoes: OpcoesClienteServidor) => { marcador: boolean }>(
+    () => ({ marcador: true }),
+  ),
+)
 
 vi.mock('next/headers', () => ({ cookies: async () => cookieStore }))
 vi.mock('@supabase/ssr', () => ({ createServerClient }))

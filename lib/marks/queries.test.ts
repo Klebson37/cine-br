@@ -9,7 +9,7 @@ import { getCurrentUser, getMarks, listMarkedIds } from './queries'
 /** Dublê do encadeamento do supabase-js: from().select().eq().order() */
 function supabaseFake({
   user = { id: 'u1', user_metadata: { full_name: 'Ana Souza' } } as unknown,
-  rows = [] as unknown[],
+  rows = [] as unknown[] | null,
   error = null as unknown,
 }) {
   const builder: Record<string, unknown> = {}

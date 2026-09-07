@@ -63,7 +63,9 @@ describe('saveProviders', () => {
 
 /** Dublê do encadeamento de escrita: from().upsert() e from().delete().eq() */
 function supabaseFake(user: unknown = { id: 'u1' }) {
-  const upsert = vi.fn(async () => ({ error: null }))
+  const upsert = vi.fn<() => Promise<{ error: { message: string } | null }>>(
+    async () => ({ error: null }),
+  )
   const eq = vi.fn(() => builderDelete)
   const builderDelete: Record<string, unknown> = { eq }
   const del = vi.fn(() => builderDelete)
