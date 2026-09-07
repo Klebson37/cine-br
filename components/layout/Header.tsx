@@ -27,17 +27,9 @@ export function Header({ selectedCount, user }: HeaderProps) {
       />
 
       <div className="flex h-full items-center gap-2 px-[var(--margem)] sm:gap-6">
-        {/* O contraste de largura dentro da própria palavra: o eixo do
-            Archivo faz o trabalho que uma segunda fonte faria. */}
-        <Link
-          href="/"
-          className="sobre-arte flex h-9 shrink-0 items-center text-xl font-bold tracking-tight text-projecao"
-        >
-          <span className="panoramico">Cine</span>
-          <span className="font-normal text-nevoa">BR</span>
-        </Link>
+        <Marca />
 
-        {/* No celular o campo inteiro não cabe ao lado do logo, dos
+        {/* No celular o campo inteiro não cabe ao lado da marca, dos
             streamings e da conta: ele saía com 51px de largura, o bastante
             para uma letra do texto de ajuda. Da largura sm para cima o campo
             aparece; abaixo dela, a lupa leva à busca, que tem o campo. */}
@@ -48,7 +40,7 @@ export function Header({ selectedCount, user }: HeaderProps) {
         >
           <Suspense
             fallback={
-              <div className="h-9 w-full rounded-sm border border-projecao/15 bg-tinta/50" />
+              <div className="h-9 w-full rounded-full border border-projecao/15 bg-projecao/[0.06]" />
             }
           >
             <SearchField />
@@ -72,7 +64,13 @@ export function Header({ selectedCount, user }: HeaderProps) {
         >
           <Tela />
           <span className="hidden sm:inline">Meus streamings</span>
-          <span className="tabular-nums">({selectedCount})</span>
+          {/* Dourado quando há serviços marcados: no site inteiro o dourado
+              quer dizer "isso é seu". Zero não é conquista nenhuma. */}
+          <span
+            className={`tabular-nums ${selectedCount > 0 ? 'text-luz' : 'text-nevoa'}`}
+          >
+            ({selectedCount})
+          </span>
         </Link>
 
         <AuthButton user={user} />
@@ -81,15 +79,43 @@ export function Header({ selectedCount, user }: HeaderProps) {
   )
 }
 
+/** A marca: um sinal vermelho antes da palavra.
+ *
+ *  O quadrado com o triângulo repete a régua vermelha que abre cada seção
+ *  do site, então a barra passa a pertencer visivelmente à mesma peça que o
+ *  conteúdo. Só a palavra, sem sinal, não dizia de que site se tratava até
+ *  a pessoa ler. */
+function Marca() {
+  return (
+    <Link
+      href="/"
+      className="sobre-arte group/marca flex h-9 shrink-0 items-center gap-2 text-xl font-bold tracking-tight text-projecao"
+    >
+      <span
+        aria-hidden
+        className="flex size-7 items-center justify-center rounded-[0.5rem] bg-cortina shadow-[0_0_18px_-4px_rgba(229,9,20,0.95)] transition-transform duration-300 group-hover/marca:scale-110"
+      >
+        <svg viewBox="0 0 24 24" className="size-3.5 translate-x-px" fill="#fff">
+          <path d="M8 5.4v13.2L19 12z" />
+        </svg>
+      </span>
+      <span className="flex items-baseline">
+        <span className="panoramico">Cine</span>
+        <span className="font-normal text-nevoa">BR</span>
+      </span>
+    </Link>
+  )
+}
+
 function Lupa() {
   return (
     <svg
       viewBox="0 0 24 24"
       aria-hidden
-      className="size-[1.15rem]"
+      className="size-[1.35rem]"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.9"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     >

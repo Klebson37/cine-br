@@ -137,7 +137,26 @@ body::after {
   opacity: 0;
   background: color-mix(in srgb, var(--color-tinta) 88%, transparent);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-borda) 70%, transparent);
+}
+
+/* Fio de luz na base da barra, no lugar da linha reta de ponta a ponta:
+   acende no meio, do vermelho da cortina ao dourado da projeção, e apaga
+   nas pontas. É a mesma dupla de cores que o resto do site usa — vermelho
+   para chamar, dourado para o que é seu — dita uma vez em um fio de 1px. */
+.fundo-cabecalho::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--color-cortina) 60%, transparent) 22%,
+    color-mix(in srgb, var(--color-luz) 55%, transparent) 50%,
+    color-mix(in srgb, var(--color-cortina) 60%, transparent) 78%,
+    transparent
+  );
 }
 
 @media (prefers-reduced-motion: no-preference) {

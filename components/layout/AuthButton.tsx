@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { signOut } from '@/app/actions'
 import type { CurrentUser } from '@/lib/marks/queries'
-import { BOTAO_CABECALHO } from './chrome'
+import { BOTAO_CABECALHO, BOTAO_DESTAQUE } from './chrome'
 
 export function AuthButton({ user }: { user: CurrentUser | null }) {
   if (!user) {
     return (
-      <Link href="/auth/login" className={BOTAO_CABECALHO}>
+      <Link href="/auth/login" className={BOTAO_DESTAQUE}>
         Entrar
       </Link>
     )

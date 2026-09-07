@@ -21,7 +21,7 @@ function BuscaNoCelular() {
     <form action="/search" role="search" className="mb-8 sm:hidden">
       <Suspense
         fallback={
-          <div className="h-9 w-full rounded-sm border border-projecao/15 bg-tinta/50" />
+          <div className="h-9 w-full rounded-full border border-projecao/15 bg-projecao/[0.06]" />
         }
       >
         <SearchField />

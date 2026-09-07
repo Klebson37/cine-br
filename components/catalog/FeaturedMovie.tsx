@@ -1,12 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  describeSelection,
-  formatRating,
-  formatRuntime,
-} from '@/lib/catalog/format'
+import { describeSelection, formatRuntime } from '@/lib/catalog/format'
 import type { Movie, Provider } from '@/lib/catalog/types'
 import { MetaLine } from './MetaLine'
+import { Nota } from './Nota'
 
 interface FeaturedMovieProps {
   movie: Movie | undefined
@@ -72,14 +69,18 @@ export function FeaturedMovie({
             {movie.title}
           </h1>
 
-          <MetaLine
-            className="sobre-arte mt-6 text-sm text-projecao/70"
-            items={[
-              movie.year !== null ? String(movie.year) : null,
-              formatRuntime(movie.runtimeMinutes),
-              formatRating(movie.rating),
-            ]}
-          />
+          {/* O mesmo selo dos cartazes, no tamanho do herói: a nota é o
+              primeiro filtro de quem escolhe um filme. */}
+          <div className="sobre-arte mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <Nota rating={movie.rating} variant="destaque" />
+            <MetaLine
+              className="text-sm text-projecao/70"
+              items={[
+                movie.year !== null ? String(movie.year) : null,
+                formatRuntime(movie.runtimeMinutes),
+              ]}
+            />
+          </div>
 
           {movie.overview && (
             <p className="sobre-arte mt-5 line-clamp-3 max-w-[48ch] text-[0.9375rem] leading-relaxed text-projecao/85">

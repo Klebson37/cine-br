@@ -2,11 +2,12 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { MarkButton } from '@/components/catalog/MarkButton'
 import { MetaLine } from '@/components/catalog/MetaLine'
+import { Nota } from '@/components/catalog/Nota'
 import { VoltarAoCatalogo } from '@/components/layout/VoltarAoCatalogo'
 import { CastList } from '@/components/movie/CastList'
 import { Trailer } from '@/components/movie/Trailer'
 import { WhereToWatch } from '@/components/movie/WhereToWatch'
-import { formatRating, formatRuntime } from '@/lib/catalog/format'
+import { formatRuntime } from '@/lib/catalog/format'
 import { getMovieDetail } from '@/lib/catalog/queries'
 import { getCurrentUser, getMarks } from '@/lib/marks/queries'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
@@ -84,14 +85,19 @@ export default async function MoviePage({ params }: MoviePageProps) {
             <h1 className="panoramico text-[clamp(1.875rem,4.5vw,3.5rem)] font-bold leading-[1] text-projecao">
               {movie.title}
             </h1>
-            <MetaLine
-              className="mt-4 text-sm text-nevoa"
-              items={[
-                movie.year !== null ? String(movie.year) : null,
-                formatRuntime(movie.runtimeMinutes),
-                formatRating(movie.rating),
-              ]}
-            />
+            {/* A nota sai da linha de texto e vira selo: é o dado que decide
+                se a pessoa assiste, e como texto cinza entre o ano e a
+                duração ela pesava o mesmo que a duração. */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+              <Nota rating={movie.rating} variant="destaque" />
+              <MetaLine
+                className="text-sm text-nevoa"
+                items={[
+                  movie.year !== null ? String(movie.year) : null,
+                  formatRuntime(movie.runtimeMinutes),
+                ]}
+              />
+            </div>
             <div className="mt-5">
               <MarkButton
                 movieId={movie.id}
