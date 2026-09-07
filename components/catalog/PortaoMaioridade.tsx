@@ -48,9 +48,9 @@ export function PortaoMaioridade() {
         </h1>
 
         <p className="relative mx-auto mt-4 max-w-[46ch] text-sm leading-relaxed text-nevoa">
-          Filmes classificados para maiores de 18 anos pelos órgãos oficiais do
-          Brasil, Estados Unidos, Japão, Alemanha e França — e, como no resto
-          do site, com a indicação de onde assistir no que você já assina.
+          Cinema erótico e de teor adulto, de vários lugares do mundo — e,
+          como no resto do site, com a indicação de onde assistir no que você
+          já assina.
         </p>
 
         <form action={confirmarMaioridade} className="relative mt-7">

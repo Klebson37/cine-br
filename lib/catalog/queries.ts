@@ -44,11 +44,10 @@ function comPoster(movies: Movie[]): Movie[] {
 
 export interface DiscoverOptions {
   providerIds?: number[]
-  /** Filtra pela classificação indicativa de um país. Os dois andam
-   *  juntos: "18" sem país não diz nada, porque cada órgão usa o próprio
-   *  código — 18 no Brasil, NC-17 nos EUA, R18+ no Japão. */
-  certificationCountry?: string
-  certification?: string
+  /** Ids de palavra-chave do TMDB, separados por pipe (OU) ou vírgula (E).
+   *  É o que descreve o teor de um filme, e não a faixa etária: "18 anos"
+   *  cabe tanto em Deadpool quanto em Emmanuelle. */
+  keywords?: string
   genreId?: number
   sortBy?: string
   page?: number
@@ -65,16 +64,14 @@ export async function discoverMovies({
   page = 1,
   minVoteAverage,
   minVoteCount,
-  certificationCountry,
-  certification,
+  keywords,
 }: DiscoverOptions): Promise<Movie[]> {
   const data = await tmdbFetch<RawPaginated<RawMovie>>(
     '/discover/movie',
     {
       watch_region: WATCH_REGION,
       with_watch_monetization_types: 'flatrate',
-      certification_country: certificationCountry,
-      certification,
+      with_keywords: keywords,
       // Pipe significa OU. Vírgula significaria E — filmes presentes em
       // todos os serviços ao mesmo tempo, que não é o que o usuário quer.
       with_watch_providers:

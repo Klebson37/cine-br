@@ -12,14 +12,12 @@ import { TAMANHO_RANKING } from '@/lib/catalog/rails'
 import type { Movie } from '@/lib/catalog/types'
 import { readSelectedProviderIds } from '@/lib/preferences.server'
 
-/** A seção +18: cinema classificado para adultos, por órgão oficial.
+/** A seção +18: cinema de teor adulto.
  *
- *  Sondei o TMDB antes de montar isto: `include_adult=true` no /discover
- *  devolve zero títulos pornográficos, porque o TMDB os remove daquele
- *  endpoint por completo. Não existe catálogo pornográfico navegável para
- *  construir. O que existe, e com fartura, é classificação indicativa — e é
- *  disso que a seção é feita. Está escrito na página, para ninguém entrar
- *  esperando outra coisa. */
+ *  A primeira versão desta página era montada por classificação etária, e
+ *  trazia Deadpool e Demon Slayer — selo 18 por violência, não por teor.
+ *  Agora o corte é por palavra-chave, que é o que descreve teor de fato.
+ *  O porquê de cada escolha está em lib/catalog/adulto.ts. */
 export default async function Mais18Page() {
   const store = await cookies()
   if (!confirmouMaioridade(store.get(MAIOR_IDADE_COOKIE)?.value)) {
@@ -28,14 +26,15 @@ export default async function Mais18Page() {
 
   const selectedIds = await readSelectedProviderIds()
 
-  // Uma fileira por órgão classificador, em paralelo. A que falhar vira
-  // lista vazia e some, em vez de derrubar a seção inteira.
+  // Em paralelo. A fileira que falhar vira lista vazia e some, em vez de
+  // derrubar a seção inteira.
   const resultados = await Promise.all(
     FAIXAS_ADULTAS.map((faixa) =>
       discoverMovies({
         providerIds: selectedIds,
-        certificationCountry: faixa.pais,
-        certification: faixa.certificacao,
+        keywords: faixa.keywords,
+        sortBy: faixa.sortBy,
+        minVoteCount: faixa.minVoteCount,
       }).catch(() => [] as Movie[]),
     ),
   )
@@ -50,11 +49,10 @@ export default async function Mais18Page() {
             <h1 className="panoramico text-[clamp(1.75rem,4vw,2.75rem)] font-bold leading-tight text-projecao">
               Seção +18
             </h1>
-            <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-nevoa">
-              Filmes classificados para maiores de 18 anos pelos órgãos
-              oficiais de cinco países.{' '}
+            <p className="mt-3 max-w-[62ch] text-sm leading-relaxed text-nevoa">
+              Cinema erótico e de teor adulto, de vários lugares do mundo.{' '}
               {selectedIds.length > 0
-                ? 'Filtrados pelos streamings que você assina.'
+                ? 'Filtrado pelos streamings que você assina.'
                 : 'Escolha seus streamings para ver só o que já está incluído.'}
             </p>
           </div>
@@ -89,9 +87,8 @@ export default async function Mais18Page() {
       ) : (
         <div className="wrap mt-10">
           <p className="max-w-[52ch] text-sm leading-relaxed text-nevoa">
-            Nenhum filme classificado 18 anos nos streamings que você
-            selecionou. Tire algum filtro de streaming para ver o catálogo
-            inteiro.
+            Nada nos streamings que você selecionou. Tire algum filtro de
+            streaming para ver o catálogo inteiro.
           </p>
         </div>
       )}
@@ -100,11 +97,9 @@ export default async function Mais18Page() {
           pornografia precisa saber em trinta segundos que não é isso. */}
       <div className="wrap mt-12">
         <p className="max-w-[62ch] border-t border-borda pt-6 text-xs leading-relaxed text-nevoa/80">
-          Esta seção lista cinema com classificação etária adulta — 18 anos no
-          Brasil, NC-17 nos Estados Unidos, R18+ no Japão, 18 na Alemanha e na
-          França. Não é conteúdo pornográfico: a base de dados do TMDB, que
-          abastece o site inteiro, não disponibiliza esse catálogo para
-          navegação.
+          Esta seção lista cinema erótico comercial e classificado. Não é
+          conteúdo pornográfico: a base de dados do TMDB, que abastece o site
+          inteiro, não disponibiliza esse catálogo para navegação.
         </p>
       </div>
     </div>
